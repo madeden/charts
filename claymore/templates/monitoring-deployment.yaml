@@ -1,0 +1,40 @@
+---
+# Claymore Service deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{.Values.ethmon.service.name | trunc 24 }}
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: {{.Values.ethmon.service.name | trunc 24 }}
+    heritage: {{.Release.Service | quote }}
+    chart: {{.Chart.Name}}-{{.Chart.Version}}
+    release: {{ .Release.Name | quote }}
+  annotations:
+    "helm.sh/created": {{.Release.Time.Seconds | quote }}
+spec:
+  replicas: {{ .Values.ethmon.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.ethmon.service.name | trunc 24 }}
+    spec:
+      containers:
+      - name: {{ .Values.ethmon.service.name | trunc 24 }}
+        resources:
+{{ toYaml .Values.ethmon.resources | indent 12 }}
+        image: {{ .Values.ethmon.image.repo }}/{{ .Values.ethmon.image.name }}:{{ .Values.ethmon.image.dockerTag }}
+        imagePullPolicy: {{  .Values.global.imagePullPolicy }}
+        command: {{ .Values.ethmon.service.command }}
+        ports:
+        - name: ethmon
+          containerPort: {{ .Values.ethmon.service.internalPort }}
+          protocol: TCP
+        volumeMounts:
+        - name: cluster-config
+          mountPath: /config
+      volumes:
+      - name: cluster-config
+        configMap:
+          name: cluster-config
+---

@@ -1,0 +1,168 @@
+{{- $release := .Release.Name -}}
+{{- $releaseNamespace := .Release.Namespace -}}
+{{- $releaseService := .Release.Service -}}
+{{- $chart := .Chart.Name -}}
+{{- $chartVersion := .Chart.Version -}}
+{{- $repo := .Values.claymoreCluster.image.repo -}}
+{{- $image := .Values.claymoreCluster.image.name -}}
+{{- $tag := .Values.claymoreCluster.image.dockerTag -}}
+{{- $name := .Values.claymoreCluster.service.name | trunc 24 -}}
+{{- $port := .Values.claymoreCluster.service.internalPort -}}
+{{- $nodes := .Values.claymoreCluster.settings.nodes -}}
+{{- $nbGpuPerNode := .Values.claymoreCluster.settings.nbGpuPerNode -}}
+{{- $di := .Values.claymoreCluster.settings.di -}}
+{{- $gser := .Values.claymoreCluster.settings.gser -}}
+{{- $mode := .Values.claymoreCluster.settings.mode -}}
+{{- $epool := .Values.claymoreCluster.settings.epool -}}
+{{- $ewal := .Values.claymoreCluster.settings.ewal -}}
+{{- $epsw := .Values.claymoreCluster.settings.epsw -}}
+{{- $esm := .Values.claymoreCluster.settings.esm -}}
+{{- $ethi := .Values.claymoreCluster.settings.ethi -}}
+{{- $resources := .Values.claymoreCluster.resources -}}
+
+---
+# Defining a generic configuration file for the cluster
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-config
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: {{.Values.claymoreCluster.service.name | trunc 24 }}
+    heritage: {{.Release.Service | quote }}
+    chart: {{.Chart.Name}}-{{.Chart.Version}}
+    release: {{ .Release.Name | quote }}
+data:
+  config.json: >
+    {
+      "title": "%HR% MH/s - Miner Monitor",
+      "header": "Miner Monitor",
+      "miner_poll": 10000,
+      "miner_timeout": 5000,
+      "web_refresh": 10000,
+      "tolerance": 5,
+      "temperature": 70,
+      "hashrates": false,
+      "miners": [
+        {{ range $node, $nbn := until (int $nodes) }}
+        {{ range $worker, $nbw := until (int $nbGpuPerNode) }}
+        {
+          "name": "worker-{{ $node }}-{{ $worker }}",
+          "host": "worker-{{ $node }}-{{ $worker }}.{{$releaseNamespace}}.svc.cluster.local",
+          "port": {{ $port }},
+          "target_eth": 118,
+          "target_dcr": 2700,
+          "comments": "Kubernetes Claymore Test",
+          "offline": false
+        }{{ if and (eq $node (sub (int $nodes) 1)) (eq $worker (sub (int $nbGpuPerNode) 1)) }}]{{ else }},{{end}}
+        {{ end }}
+        {{ end }}
+    }
+---
+{{ range $node, $nbn := until (int .Values.claymoreCluster.settings.nodes) }}
+{{ range $worker, $nbw := until (int $nbGpuPerNode) }}
+# Definiting a scalable cluster
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: worker-{{ $node }}-{{ $worker }}
+  namespace: {{ $releaseNamespace }}
+  labels:
+    app: {{ $name }}
+    heritage: {{ $releaseService }}
+    chart: {{ $chart }}-{{ $chartVersion }}
+    release: {{ $release }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      node: n{{ $node }}
+      worker: w{{ $worker }}
+      app: {{ $name }}
+      heritage: {{ $releaseService }}
+      chart: {{ $chart }}-{{ $chartVersion }}
+      release: {{ $release }}
+  template:
+    metadata:
+      labels:
+        node: n{{ $node }}
+        worker: w{{ $worker }}
+        app: {{ $name }}
+        heritage: {{ $releaseService }}
+        chart: {{ $chart }}-{{ $chartVersion }}
+        release: {{ $release }}
+    spec:
+      containers:
+      - name: claymore-miner
+        image: {{ $repo }}/{{ $image }}:{{ $tag }}
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+{{ toYaml $resources.requests | indent 12 }}
+            alpha.kubernetes.io/nvidia-gpu: 1
+          limits:
+{{ toYaml $resources.limits | indent 12 }}           
+            alpha.kubernetes.io/nvidia-gpu: 1
+        command: [ "/entrypoint.sh" ]
+        ports:
+        - name: claymore-miner
+          containerPort: {{ $port }}
+        env:
+        - name: POD_NAME
+          value: worker-{{ $node }}-{{ $worker }}
+        - name: DI
+          value: {{ $worker | quote }}
+        - name: GSER
+          value: {{ $gser | quote }}
+        - name: MODE
+          value: {{ $mode | quote }}
+        - name: EPOOL
+          value: {{ $epool }}
+        - name: EWAL
+          value: {{ $ewal }}
+        - name: EPSW
+          value: {{ $epsw | quote }}
+        - name: ESM
+          value: {{ $esm | quote}}
+        - name: ETHI
+          value: {{ $ethi | quote }}
+        - name: MODE
+          value: {{ $mode | quote }}
+        - name: LD_LIBRARY_PATH
+          value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
+        volumeMounts:
+        - mountPath: /dev/nvidia{{ $worker }}
+          name: nvidia{{ $worker }}
+        - mountPath: /dev/nvidiactl
+          name: nvidiactl
+        - mountPath: /dev/nvidia-uvm
+          name: nvidia-uvm
+        - mountPath: /usr/local/nvidia/bin
+          name: bin
+        - mountPath: /usr/lib/nvidia
+          name: lib
+        - mountPath: /usr/lib/cuda
+          name: libcuda
+      volumes:
+      - name: nvidia{{ $worker }}
+        hostPath: 
+          path: /dev/nvidia{{ $worker }}
+      - name: nvidiactl
+        hostPath: 
+          path: /dev/nvidiactl
+      - name: nvidia-uvm
+        hostPath: 
+          path: /dev/nvidia-uvm
+      - name: bin
+        hostPath: 
+          path: /usr/lib/nvidia-375/bin
+      - name: lib
+        hostPath: 
+          path: /usr/lib/nvidia-375
+      - name: libcuda
+        hostPath: 
+          path: /usr/lib/x86_64-linux-gnu
+---
+{{ end }}
+{{ end }}
