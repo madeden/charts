@@ -132,12 +132,6 @@ spec:
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         volumeMounts:
-        - mountPath: /dev/nvidia{{ $worker }}
-          name: nvidia{{ $worker }}
-        - mountPath: /dev/nvidiactl
-          name: nvidiactl
-        - mountPath: /dev/nvidia-uvm
-          name: nvidia-uvm
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
@@ -145,15 +139,6 @@ spec:
         - mountPath: /usr/lib/cuda
           name: libcuda
       volumes:
-      - name: nvidia{{ $worker }}
-        hostPath: 
-          path: /dev/nvidia{{ $worker }}
-      - name: nvidiactl
-        hostPath: 
-          path: /dev/nvidiactl
-      - name: nvidia-uvm
-        hostPath: 
-          path: /dev/nvidia-uvm
       - name: bin
         hostPath: 
           path: /usr/lib/nvidia-375/bin

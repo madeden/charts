@@ -50,16 +50,11 @@ spec:
         image: {{ $repo }}/{{ $image }}:{{ $tag }}
         {{ if eq $job "worker" }}
         {{ if $isGpu }}
-        securityContext:
-          privileged: true
         resources:
           requests:
             alpha.kubernetes.io/nvidia-gpu: 1
           limits:
             alpha.kubernetes.io/nvidia-gpu: 1 
-        volumeMounts:
-        - mountPath: /dev/nvidia0
-          name: nvidia0
         {{ end }}
         {{ end }}
         ports:
@@ -84,15 +79,6 @@ spec:
           claimName: {{ $storname }}
       {{ if eq $job "worker" }}
       {{ if $isGpu }}
-      - name: nvidia0
-        hostPath: 
-          path: /dev/nvidia0
-      - name: nvidiactl
-        hostPath: 
-          path: /dev/nvidiactl
-      - name: nvidia-uvm
-        hostPath: 
-          path: /dev/nvidia-uvm
       - name: bin
         hostPath: 
           path: /usr/lib/nvidia-375/bin

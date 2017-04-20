@@ -1,5 +1,4 @@
 global:
-  imagePullPolicy: IfNotPresent
   services:
     aws:
       region: us-east-1

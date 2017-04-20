@@ -54,8 +54,6 @@ spec:
         {{ if eq $job "worker" }}
         {{ if $isGpu }}
         image: {{ $repo }}/{{ $image }}:{{ $tagGpu }}
-        securityContext:
-          privileged: true
         resources:
           requests:
 {{ toYaml $resources.requests | indent 12 }}
@@ -98,14 +96,6 @@ spec:
           mountPath: /var/tensorflow
         {{ if eq $job "worker" }}
         {{ if $isGpu }}
-          {{ range $j, $f := until (int $nbGpu) | default 1 }}
-        - mountPath: /dev/nvidia{{ $j }}
-          name: nvidia{{ $j }}
-          {{ end }}
-        - mountPath: /dev/nvidiactl
-          name: nvidiactl
-        - mountPath: /dev/nvidia-uvm
-          name: nvidia-uvm
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
@@ -120,17 +110,6 @@ spec:
           claimName: {{ $storname }}
       {{ if eq $job "worker" }}
       {{ if $isGpu }}
-        {{ range $j, $f := until (int $nbGpu) | default 1 }}
-      - name: nvidia{{ $j }}
-        hostPath: 
-          path: /dev/nvidia{{ $j }}
-        {{ end }}
-      - name: nvidiactl
-        hostPath: 
-          path: /dev/nvidiactl
-      - name: nvidia-uvm
-        hostPath: 
-          path: /dev/nvidia-uvm
       - name: bin
         hostPath: 
           path: /usr/lib/nvidia-375/bin
