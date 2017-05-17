@@ -19,7 +19,7 @@ storage:
 tfCluster:
   deploy: true
   service:
-    name: tensorflow-cluster
+    name: tenhsorflow-cluster
     internalPort: 8080
     externalPort: 8080
     type: ClusterIP
@@ -28,10 +28,8 @@ tfCluster:
     name: tf-models
     dockerTagCpu: train-0.11-0.0.8
     dockerTagGpu: train-0.11-gpu-0.0.8
-    # dockerTagGpu: train-0.11-0.0.8
-    # dockerTagCpu: train-0.9-1
-    # dockerTagGpu: train-0.9-gpu-1
   settings:
+    mode: continuous
     dataset: imagenet
     isGpu: true
     nbGpuPerNode: 1
@@ -54,8 +52,6 @@ evaluating:
     name: tf-models
     dockerTagCpu: train-0.11-0.0.8
     dockerTagGpu: train-0.11-gpu-0.0.8
-    # dockerTagCpu: train-0.9-1
-    # dockerTagGpu: train-0.9-gpu-1
   service:
     name: eval
     command: '[ "/eval.sh" ]'
@@ -84,7 +80,6 @@ tensorboard:
     type: ClusterIP
     externalPort: 6006
     internalPort: 6006
-    command: '[ "tensorboard", "--logdir", "/var/tensorflow/imagenet-eval" ]'
   settings:
   resources:
     requests:

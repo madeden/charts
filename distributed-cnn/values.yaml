@@ -39,7 +39,7 @@ tensorboard:
     dockerTag: 1.1.0-rc2
   service:
     name: tensorboard
-    dns: tensorboard.madeden.net
+    dns: www.54.210.200.140.xip.io
     type: ClusterIP
     externalPort: 6006
     internalPort: 6006

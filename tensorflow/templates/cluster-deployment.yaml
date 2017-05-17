@@ -9,6 +9,7 @@
 {{- $isGpu := .Values.tfCluster.settings.isGpu -}}
 {{- $dataset := .Values.tfCluster.settings.dataset -}}
 {{- $resources := .Values.tfCluster.resources -}}
+{{- $mode := .Values.tfCluster.settings.mode -}}
 
 ---
 # Defining a generic configuration file for the cluster
@@ -32,17 +33,26 @@ data:
 {{- range $job, $nb := .Values.tfCluster.settings.jobs }}
 {{ range $i, $e := until (int $nb) | default 8 }}
 # Definiting a scalable cluster
+{{ if eq $mode "continuous" }}
 apiVersion: extensions/v1beta1
 kind: Deployment
+{{ else }}
+apiVersion: batch/v1
+kind: Job
+{{ end }}
 metadata:
   name: {{ $job }}-{{$i}}
   namespace: {{ $relname }}
 spec:
+{{ if eq $mode "continuous" }}
   replicas: 1
   selector:
     matchLabels:
       job: {{ $job }}
       task: t{{$i}}
+{{ else }}
+  parallelism: 1
+{{ end }}
   template:
     metadata:
       labels:
@@ -79,7 +89,7 @@ spec:
         - name: DATASET
           value: {{ $dataset }}
         - name: DATA_DIR
-          value: /var/tensorflow
+          value: /var/tensorflow/{{ $dataset }}
         - name: GRPC_VERBOSITY
           value: DEBUG
         - name: POD_NAME
@@ -93,7 +103,7 @@ spec:
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         volumeMounts:
         - name: {{ $storname }}
-          mountPath: /var/tensorflow
+          mountPath: /var/tensorflow/{{ $dataset }}
         {{ if eq $job "worker" }}
         {{ if $isGpu }}
         - mountPath: /usr/local/nvidia/bin

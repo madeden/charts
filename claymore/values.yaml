@@ -13,7 +13,7 @@ claymoreCluster:
     dockerTag: 9.1
   settings:
     nodes: "3"
-    nbGpuPerNode: "2"
+    nbGpuPerNode: "1"
     # nbGpuPerWorker: 1
     di: detect
     gser: "0"
@@ -39,7 +39,7 @@ ethmon:
     dockerTag: 0.0.1
   service:
     name: ethmon
-    dns: 172.16.0.5.xip.io
+    dns: 54.210.200.140.xip.io
     type: ClusterIP
     externalPort: 3000
     internalPort: 3000

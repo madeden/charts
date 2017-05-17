@@ -4,6 +4,7 @@
 {{- $tagCpu := .Values.evaluating.image.dockerTagCpu -}}
 {{- $nbGpu := .Values.evaluating.settings.nbGpuPerNode -}}
 {{- $isGpu := .Values.evaluating.settings.isGpu -}}
+{{- $dataset := .Values.tfCluster.settings.dataset -}}
 ---
 # Tensorboard deployment
 apiVersion: extensions/v1beta1
@@ -31,14 +32,14 @@ spec:
 {{ toYaml .Values.tensorboard.resources | indent 12 }}
         image: {{ .Values.tensorboard.image.repo }}/{{ .Values.tensorboard.image.name }}:{{ .Values.tensorboard.image.dockerTag }}
         imagePullPolicy: {{  .Values.global.imagePullPolicy }}
-        command: {{ .Values.tensorboard.service.command }}
+        command: [ "tensorboard", "--logdir", "/var/tensorflow/{{ $dataset }}/eval" ]
         ports:
         - name: tensorboard
           containerPort: {{ .Values.tensorboard.service.internalPort }}
           protocol: TCP
         volumeMounts:
         - name: {{ .Values.storage.name }}
-          mountPath: /var/tensorflow
+          mountPath: /var/tensorflow/{{ $dataset }}
       volumes:
       - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
@@ -84,7 +85,7 @@ spec:
             {{ if $isGpu }}alpha.kubernetes.io/nvidia-gpu: {{ $nbGpu }}{{ end }}    
         env:
         - name: DATASET
-          value: {{ .Values.evaluating.settings.dataset }}
+          value: {{ $dataset }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         volumeMounts:
@@ -97,7 +98,7 @@ spec:
           name: libcuda
         {{ end }}
         - name: {{ .Values.storage.name }}
-          mountPath: /var/tensorflow
+          mountPath: /var/tensorflow/{{ $dataset }}
       volumes:
       - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
