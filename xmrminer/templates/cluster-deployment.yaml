@@ -55,7 +55,7 @@ spec:
         release: {{ $release }}
     spec:
       containers:
-      - name: xmr-miner
+      - name: xmr-miner-{{ $clusterName }}
         {{ if eq $gpuComplexity 0 }}
         image: {{ $repo }}/{{ $image }}:{{ $tag }}
         {{ else }}
@@ -65,13 +65,13 @@ spec:
         resources:
           requests:
             cpu: {{ $cpusPerWorker }}000m
-            memory: 4096Mi
+            memory: 1024Mi
             {{ if gt $gpuComplexity 0 }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
           limits:
             cpu: {{ mul 2 $cpusPerWorker }}000m
-            memory: 4096Mi
+            memory: 1024Mi
             {{ if gt $gpuComplexity 0 }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
