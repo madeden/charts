@@ -11,9 +11,9 @@ moneroCluster:
   settings:
     clusterName: ob
     pool: minergate
-    coin: "-qcn"
-    nodes: 2
-    workersPerNode: 1
-    cpusPerWorker: 1
-    gpuComplexity: 4
+    coin: "-xmr"
+    nodes: 3
+    workersPerNode: 2
+    cpusPerWorker: 2
+    gpuComplexity: 3
     username: samnco@gmail.com
