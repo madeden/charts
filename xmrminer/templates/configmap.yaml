@@ -1,0 +1,15 @@
+---
+# Defining a generic configuration file for the cluster
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: {{.Values.moneroCluster.service.name | trunc 24 }}
+    heritage: {{.Release.Service | quote }}
+    chart: {{.Chart.Name}}-{{.Chart.Version}}
+    release: {{ .Release.Name | quote }}
+data:
+  config.txt: |-
+{{ .Values.moneroCluster.configMap | indent 4 }}
