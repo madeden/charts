@@ -65,7 +65,7 @@ spec:
         resources:
           requests:
             cpu: {{ $cpusPerWorker }}000m
-            memory: 1024Mi
+            memory: 4096Mi
             {{ if gt $gpuComplexity 0 }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
@@ -87,15 +87,15 @@ spec:
         volumeMounts:
         - name: {{ $release }}-config
           mountPath: /config
-        {{ if gt $gpuComplexity 0 }}
+      {{ if gt $gpuComplexity 0 }}
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
           name: lib
         - mountPath: /usr/lib/cuda
           name: libcuda
-        {{ end }}
-    volumes:
+      {{ end }}
+      volumes:
       - name: {{ $release }}-config
         configMap:
           name: {{ $release }}-config

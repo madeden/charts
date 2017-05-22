@@ -13,16 +13,17 @@ moneroCluster:
     pool: xmrminer
     nodes: 3
     workersPerNode: 1
-    cpusPerWorker: 4
+    cpusPerWorker: 5
     gpuComplexity: 1
     username: samnco@gmail.com
   configMap: |-
-    "cpu_thread_num" : 4,
+    "cpu_thread_num" : 5,
     "cpu_threads_conf" : [ 
       { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 0 },
       { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 1 },
       { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 2 },
-      { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 3 },],
+      { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 3 },
+      { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 4 },],
     "gpu_threads_conf" : [
       { "index" : 0, "threads" : 64, "blocks" : 30, "bfactor" : 6, "bsleep" :  25, "affine_to_cpu" : false},
      ],
