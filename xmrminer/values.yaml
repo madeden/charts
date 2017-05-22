@@ -7,7 +7,7 @@ moneroCluster:
   image: 
     repo: samnco
     name: xmrminer
-    dockerTag: 0.1.2
+    dockerTag: 0.1.4
   settings:
     clusterName: ob
     pool: xmrminer
