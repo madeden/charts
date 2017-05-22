@@ -1,0 +1,18 @@
+global:
+  imagePullPolicy: IfNotPresent
+
+moneroCluster:
+  service:
+    name: monero
+  image: 
+    repo: samnco
+    name: xmrminer
+    dockerTag: latest
+  settings:
+    clusterName: ob
+    pool: xmrminer
+    nodes: 3
+    workersPerNode: 2
+    cpusPerWorker: 2
+    gpuComplexity: 1
+    username: samnco@gmail.com
