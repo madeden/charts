@@ -61,7 +61,7 @@ spec:
         {{ else }}
         image: {{ $repo }}/{{ $image }}:{{ $tag }}
         {{ end }}
-        command: [ "/usr/bin/xmr-stak-nvidia" ]
+        command: [ "/usr/bin/xmr-stak-{{ if eq $gpuComplexity 0 }}cpu{{ else }}nvidia{{ end }}" ]
         resources:
           requests:
             cpu: {{ $cpusPerWorker }}000m
@@ -101,13 +101,13 @@ spec:
           name: {{ $release }}-config
       {{ if gt $gpuComplexity 0 }}
       - name: bin
-        hostPath: 
+        hostPath:
           path: /usr/lib/nvidia-375/bin
       - name: lib
-        hostPath: 
+        hostPath:
           path: /usr/lib/nvidia-375
       - name: libcuda
-        hostPath: 
+        hostPath:
           path: /usr/lib/x86_64-linux-gnu
       {{ end }}
 ---
