@@ -122,8 +122,10 @@ spec:
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
       {{ end }}
+      {{ if ne $nodeSelector "*" }}
       nodeSelector: 
         kubernetes.io/nvidia-gpu-name: {{ $nodeSelector }}
+      {{ end }}
 ---
 {{ end }}
 {{ end }}
