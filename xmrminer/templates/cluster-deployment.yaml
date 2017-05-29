@@ -15,6 +15,7 @@
 {{- $gpuComplexity := ( int .Values.moneroCluster.settings.gpuComplexity) -}}
 {{- $cpusPerWorker := ( int .Values.moneroCluster.settings.cpusPerWorker) -}}
 {{- $username := .Values.moneroCluster.settings.username -}}
+{{- $affinity := .Values.moneroCluster.settings.affinity -}}
 {{- $coin := .Values.moneroCluster.settings.coin -}}
 
 ---
@@ -32,6 +33,25 @@ metadata:
     heritage: {{ $releaseService }}
     chart: {{ $chart }}-{{ $chartVersion }}
     release: {{ $release }}
+  {{ if gt $gpuComplexity 0 }}annotations:
+    scheduler.alpha.kubernetes.io/affinity: >
+      {
+        "nodeAffinity": {
+          "requiredDuringSchedulingIgnoredDuringExecution": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "alpha.kubernetes.io/nvidia-gpu-name",
+                    "operator": "In",
+                    "values": {{ $affinity }}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }{{ end }}
 spec:
   replicas: 1
   selector:
