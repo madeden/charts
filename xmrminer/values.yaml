@@ -16,7 +16,8 @@ moneroCluster:
     cpusPerWorker: 5
     gpuComplexity: 1
     username: samnco@gmail.com
-    affinity: [ "GeForce-GTX-1060-6GB" ]
+    affinity:
+      - GeForce-GTX-1060-6GB
   configMap: |-
     "cpu_thread_num" : 5,
     "cpu_threads_conf" : [ 

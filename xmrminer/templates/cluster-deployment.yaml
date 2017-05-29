@@ -33,26 +33,17 @@ metadata:
     heritage: {{ $releaseService }}
     chart: {{ $chart }}-{{ $chartVersion }}
     release: {{ $release }}
-  {{ if gt $gpuComplexity 0 }}annotations:
-    scheduler.alpha.kubernetes.io/affinity: >
-      {
-        "nodeAffinity": {
-          "requiredDuringSchedulingIgnoredDuringExecution": {
-            "nodeSelectorTerms": [
-              {
-                "matchExpressions": [
-                  {
-                    "key": "alpha.kubernetes.io/nvidia-gpu-name",
-                    "operator": "In",
-                    "values": {{ $affinity }}
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      }{{ end }}
 spec:
+  {{ if gt $gpuComplexity 0 }}affinity:
+    nodeAffinity:
+      requiredDuringSchedulingRequiredDuringExecution: 
+        nodeSelectorTerms:
+          matchExpressions:
+          - key: alpha.kubernetes.io/nvidia-gpu-name
+            operator: In
+            values: 
+{{ toYaml $affinity | indent 12 }}
+  {{ end }}
   replicas: 1
   selector:
     matchLabels:
