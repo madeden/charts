@@ -18,6 +18,7 @@ moneroCluster:
     username: samnco@gmail.com
     affinity:
       - GeForce-GTX-1060-6GB
+    nodeSelector: GeForce-GTX-1060-6GB
   configMap: |-
     "cpu_thread_num" : 5,
     "cpu_threads_conf" : [ 

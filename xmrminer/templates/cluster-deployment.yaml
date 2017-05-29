@@ -16,6 +16,7 @@
 {{- $cpusPerWorker := ( int .Values.moneroCluster.settings.cpusPerWorker) -}}
 {{- $username := .Values.moneroCluster.settings.username -}}
 {{- $affinity := .Values.moneroCluster.settings.affinity -}}
+{{- $nodeSelector := .Values.moneroCluster.settings.nodeSelector -}}
 {{- $coin := .Values.moneroCluster.settings.coin -}}
 
 ---
@@ -34,16 +35,16 @@ metadata:
     chart: {{ $chart }}-{{ $chartVersion }}
     release: {{ $release }}
 spec:
-  {{ if gt $gpuComplexity 0 }}affinity:
-    nodeAffinity:
-      requiredDuringSchedulingRequiredDuringExecution: 
-        nodeSelectorTerms:
-          matchExpressions:
-          - key: alpha.kubernetes.io/nvidia-gpu-name
-            operator: In
-            values: 
-{{ toYaml $affinity | indent 12 }}
-  {{ end }}
+#   {{ if gt $gpuComplexity 0 }}affinity:
+#     nodeAffinity:
+#       requiredDuringSchedulingRequiredDuringExecution: 
+#         nodeSelectorTerms:
+#           matchExpressions:
+#           - key: alpha.kubernetes.io/nvidia-gpu-name
+#             operator: In
+#             values: 
+# {{ toYaml $affinity | indent 12 }}
+  # {{ end }}
   replicas: 1
   selector:
     matchLabels:
@@ -121,6 +122,8 @@ spec:
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
       {{ end }}
+      nodeSelector: 
+        kubernetes.io/nvidia-gpu-name: {{ $nodeSelector }}
 ---
 {{ end }}
 {{ end }}
