@@ -57,6 +57,10 @@ spec:
       - name: xmr-miner-{{ $clusterName }}
         image: {{ $repo }}/{{ $image }}:{{ $tag }}-{{ $gpuType }}
         command: [ "/usr/bin/xmr-stak-{{ $gpuType }}" ]
+        {{ if eq $gpuType "amd" }}
+        securityContext:
+          privileged: true
+        {{ end }}
         resources:
           requests:
             cpu: {{ $cpusPerWorker }}000m
