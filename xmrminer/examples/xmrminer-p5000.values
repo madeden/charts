@@ -1,0 +1,37 @@
+global:
+  imagePullPolicy: IfNotPresent
+
+moneroCluster:
+  service:
+    name: p5000
+  image: 
+    repo: samnco
+    name: xmrminer
+    dockerTag: 0.1.4
+  settings:
+    clusterName: p5000
+    nodes: 3
+    workersPerNode: 1
+    cpusPerWorker: 1
+    gpuType: nvidia
+    nodeSelector: Quadro-P5000
+  configMap: |-
+    "gpu_threads_conf" : [
+      { "index" : 0, "threads" : 73, "blocks" : 56, "bfactor" : 0, "bsleep" :  0, "affine_to_cpu" : false},
+     ],
+    "pool_address" : "xmr-eu.dwarfpool.com:8050",
+    "wallet_address" : "4GdoN7NCTi8a5gZug7PrwZNKjvHFmKeV11L6pNJPgj5QNEHsN6eeX3DaAQFwZ1ufD4LYCZKArktt113W7QjWvQ7CW9YZRapBW6vAuZ73md",
+    "pool_password" : "x",
+    "use_tls" : false,
+    "tls_secure_algo" : true,
+    "tls_fingerprint" : "",
+    "call_timeout" : 10,
+    "retry_time" : 10,
+    "giveup_limit" : 0,
+    "verbose_level" : 4,
+    "h_print_time" : 60,
+    "output_file" : "",
+    "httpd_port" : 3000,
+    "prefer_ipv4" : true,
+
+

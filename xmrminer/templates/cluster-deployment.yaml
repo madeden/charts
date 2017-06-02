@@ -8,14 +8,11 @@
 {{- $tag := .Values.moneroCluster.image.dockerTag -}}
 {{- $clusterName := .Values.moneroCluster.settings.clusterName | trunc 24 -}}
 {{- $name := .Values.moneroCluster.service.name | trunc 24 -}}
-{{- $pool := .Values.moneroCluster.settings.pool -}}
 {{- $gpu := .Values.moneroCluster.settings.gpu -}}
 {{- $nodes := (int .Values.moneroCluster.settings.nodes) -}}
 {{- $workersPerNode := (int .Values.moneroCluster.settings.workersPerNode) -}}
-{{- $gpuComplexity := ( int .Values.moneroCluster.settings.gpuComplexity) -}}
 {{- $cpusPerWorker := ( int .Values.moneroCluster.settings.cpusPerWorker) -}}
-{{- $username := .Values.moneroCluster.settings.username -}}
-{{- $affinity := .Values.moneroCluster.settings.affinity -}}
+{{- $gpuType := .Values.moneroCluster.settings.gpuType -}}
 {{- $nodeSelector := .Values.moneroCluster.settings.nodeSelector -}}
 {{- $coin := .Values.moneroCluster.settings.coin -}}
 
@@ -35,16 +32,6 @@ metadata:
     chart: {{ $chart }}-{{ $chartVersion }}
     release: {{ $release }}
 spec:
-#   {{ if gt $gpuComplexity 0 }}affinity:
-#     nodeAffinity:
-#       requiredDuringSchedulingRequiredDuringExecution: 
-#         nodeSelectorTerms:
-#           matchExpressions:
-#           - key: alpha.kubernetes.io/nvidia-gpu-name
-#             operator: In
-#             values: 
-# {{ toYaml $affinity | indent 12 }}
-  # {{ end }}
   replicas: 1
   selector:
     matchLabels:
@@ -68,50 +55,50 @@ spec:
     spec:
       containers:
       - name: xmr-miner-{{ $clusterName }}
-        {{ if eq $gpuComplexity 0 }}
-        image: {{ $repo }}/{{ $image }}:{{ $tag }}
-        {{ else }}
-        image: {{ $repo }}/{{ $image }}:{{ $tag }}
-        {{ end }}
-        command: [ "/usr/bin/xmr-stak-{{ if eq $gpuComplexity 0 }}cpu{{ else }}nvidia{{ end }}" ]
+        image: {{ $repo }}/{{ $image }}:{{ $tag }}-{{ $gpuType }}
+        command: [ "/usr/bin/xmr-stak-{{ $gpuType }}" ]
         resources:
           requests:
             cpu: {{ $cpusPerWorker }}000m
             memory: 1024Mi
-            {{ if gt $gpuComplexity 0 }}
+            {{ if eq $gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
           limits:
             cpu: {{ mul 2 $cpusPerWorker }}000m
             memory: 1024Mi
-            {{ if gt $gpuComplexity 0 }}
+            {{ if eq $gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
         env:
-        - name: USERNAME
-          value: {{ $username }}
-      {{ if gt $gpuComplexity 0 }}
-        - name: NB_GPU
-          value: {{ $gpuComplexity | quote }}
+        {{ if eq $gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
-      {{ end }}
+        {{ end }}
+        {{ if eq $gpuType "amd" }}
+        - name: LD_LIBRARY_PATH
+          value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
+        {{ end }}
         volumeMounts:
         - name: {{ $release }}-config
           mountPath: /config
-      {{ if gt $gpuComplexity 0 }}
+        {{ if eq $gpuType "nvidia" }}
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
           name: lib
         - mountPath: /usr/lib/cuda
           name: libcuda
-      {{ end }}
+        {{ end }}
+        {{ if eq $gpuType "amd" }}
+        - mountPath: /dev/dri
+          name: dri
+        {{ end }}
       volumes:
       - name: {{ $release }}-config
         configMap:
           name: {{ $release }}-config
-      {{ if gt $gpuComplexity 0 }}
+      {{ if eq $gpuType "nvidia" }}
       - name: bin
         hostPath:
           path: /usr/lib/nvidia-375/bin
@@ -122,9 +109,14 @@ spec:
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
       {{ end }}
+      {{ if eq $gpuType "amd" }}
+      - name: dri
+        hostPath:
+          path: /dev/dri
+      {{ end }}
       {{ if ne $nodeSelector "*" }}
       nodeSelector: 
-        kubernetes.io/nvidia-gpu-name: {{ $nodeSelector }}
+        kubernetes.io/gpu-name: {{ $nodeSelector }}
       {{ end }}
 ---
 {{ end }}
