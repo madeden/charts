@@ -1,3 +1,4 @@
+{{- $release := .Release.Name -}}
 ---
 # Claymore Service deployment
 apiVersion: extensions/v1beta1
@@ -36,5 +37,5 @@ spec:
       volumes:
       - name: cluster-config
         configMap:
-          name: cluster-config
+          name: {{ $release}}-config
 ---

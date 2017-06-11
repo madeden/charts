@@ -25,7 +25,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cluster-config
+  name: {{ $release}}-config
   namespace: {{.Release.Namespace}}
   labels:
     app: {{.Values.claymoreCluster.service.name | trunc 24 }}
@@ -95,8 +95,6 @@ spec:
       containers:
       - name: claymore-miner
         image: {{ $repo }}/{{ $image }}:{{ $tag }}
-        securityContext:
-          privileged: true
         resources:
           requests:
 {{ toYaml $resources.requests | indent 12 }}
@@ -110,7 +108,7 @@ spec:
           containerPort: {{ $port }}
         env:
         - name: POD_NAME
-          value: worker-{{ $node }}-{{ $worker }}
+          value: {{ $release}}-{{ $node }}-{{ $worker }}
         - name: DI
           value: {{ $worker | quote }}
         - name: GSER

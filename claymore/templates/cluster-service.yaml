@@ -15,7 +15,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: worker-{{ $node }}-{{ $worker }}
+  name: {{ $release }}-{{ $node }}-{{ $worker }}
   namespace: {{ $releaseNamespace }}
   labels:
     app: {{ $name  }}
