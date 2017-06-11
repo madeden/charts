@@ -1,0 +1,57 @@
+global:
+  imagePullPolicy: IfNotPresent
+
+claymoreCluster:
+  service:
+    name: claymore
+    internalPort: 3333
+    externalPort: 3333
+    type: ClusterIP
+  image: 
+    repo: samnco
+    name: claymore-miner
+    dockerTag: 9.1
+  settings:
+    nodeSelector: Quadro-P5000
+    nodes: "3"
+    nbGpuPerNode: "1"
+    di: detect
+    gser: "0"
+    mode: "1"
+    epool: eu1.ethermine.org:4444
+    ewal: 0x7bed6aaef7e957bd0d52edf04c8b6ed3409ab0df
+    epsw: x
+    esm: "0"
+    ethi: "16"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+ethmon:
+  replicaCount: 1
+  image: 
+    repo: samnco
+    name: ethmon
+    dockerTag: 0.0.1
+  service:
+    name: ethmon
+    dns: 192.168.1.243.xip.io
+    type: ClusterIP
+    externalPort: 3000
+    internalPort: 3000
+    command: '[ "npm", "start" ]'
+  settings:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+
+
