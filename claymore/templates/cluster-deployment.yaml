@@ -65,7 +65,7 @@ data:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: worker-{{ $node }}-{{ $worker }}
+  name: {{ %release }}-{{ $node }}-{{ $worker }}
   namespace: {{ $releaseNamespace }}
   labels:
     app: {{ $name }}
