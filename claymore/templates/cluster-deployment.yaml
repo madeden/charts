@@ -19,7 +19,7 @@
 {{- $esm := .Values.claymoreCluster.settings.esm -}}
 {{- $ethi := .Values.claymoreCluster.settings.ethi -}}
 {{- $resources := .Values.claymoreCluster.resources -}}
-
+{{- $nodeSelector := .Values.claymoreCluster.settings.nodeSelector -}}
 ---
 # Defining a generic configuration file for the cluster
 apiVersion: v1
@@ -148,6 +148,8 @@ spec:
       - name: libcuda
         hostPath: 
           path: /usr/lib/x86_64-linux-gnu
+      nodeSelector:
+        kubernetes.io/gpu-name: {{ $nodeSelector }}
 ---
 {{ end }}
 {{ end }}

@@ -15,7 +15,6 @@ claymoreCluster:
     nodeSelector: GeForce-GTX-1060-6GB
     nodes: "3"
     nbGpuPerNode: "1"
-    # nbGpuPerWorker: 1
     di: detect
     gser: "0"
     mode: "1"
@@ -40,7 +39,7 @@ ethmon:
     dockerTag: 0.0.1
   service:
     name: ethmon
-    dns: 54.210.200.140.xip.io
+    dns: 192.168.1.243.xip.io
     type: ClusterIP
     externalPort: 3000
     internalPort: 3000
