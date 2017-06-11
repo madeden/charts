@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{.Values.ethmon.service.name | trunc 24 }}
+  name: {{ $release }}-{{.Values.ethmon.service.name | trunc 10 }}
   namespace: {{.Release.Namespace}}
   labels:
     app: {{.Values.ethmon.service.name | trunc 24 }}
@@ -23,7 +23,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: ethmon
+  name: {{ $release }}-{{.Values.ethmon.service.name | trunc 10 }}
 spec:
   rules:
   - host: {{.Values.ethmon.service.dns }}

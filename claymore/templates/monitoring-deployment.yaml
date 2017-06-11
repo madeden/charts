@@ -4,7 +4,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{.Values.ethmon.service.name | trunc 24 }}
+  name: {{ $release }}-{{.Values.ethmon.service.name | trunc 10 }}
   namespace: {{.Release.Namespace}}
   labels:
     app: {{.Values.ethmon.service.name | trunc 24 }}
