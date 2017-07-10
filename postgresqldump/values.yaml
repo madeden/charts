@@ -8,6 +8,8 @@ image:
   pullPolicy: IfNotPresent
 service:
   schedule: "* 0 * * *"
+  archiveHistory: 4
+  archiveNamePrefix: postgresqldump 
 postgresqldb:
   credentials: 
     # On a Maas Controller, username can be found with 
@@ -21,7 +23,6 @@ postgresqldb:
   port: 37017
   dbname: maasdb
   # note: name of archive will be archiveNamePrefix-YYYYMMDDHH
-  archiveNamePrefix: postgresqldump 
 resources: 
   requests:
    cpu: 100m

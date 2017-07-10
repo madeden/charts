@@ -25,17 +25,17 @@ spec:
           initContainers:
           - name: housekeeper
             image: busybox
-            command: [ "sh", "-c", "find /tmp/{{ .Values.service.archiveVolume }}/{{ .Values.service.archiveFolder }} -name '{{ .Values.service.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+{{ add .Values.service.archiveHistory 1 }} | xargs rm -f" ]
+            command: [ "sh", "-c", "find /tmp/backup/{{ .Values.service.archiveFolder }} -name '{{ .Values.service.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+{{ add .Values.service.archiveHistory 1 }} | xargs rm -f" ]
             volumeMounts:
             - name: backup
-              mountPath: /tmp/{{ .Values.service.archiveVolume }}
+              mountPath: /tmp/backup
           containers:
           - name: juju
             resources:
 {{ toYaml .Values.resources | indent 14 }}
             image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
             imagePullPolicy: {{.Values.image.pullPolicy }}
-            command: {{ .Values.juju.command }}
+            command: [ "/bin/bash", "-c", "/usr/bin/{{- if eq .Values.juju.application 'etcd' -}}etcddump.sh{{- else if eq .Values.juju.application 'easyrsa' -}}pkidump.sh{{- else -}}cdkdump.sh{{- end -}}" ]
             env:
             # Reading credentials from secret
             - name: "MODEL"
@@ -47,12 +47,12 @@ spec:
             - name: "PREFIX"
               value: {{ .Values.service.archiveNamePrefix }}
             - name: "TARGET_DIR"
-              value: /tmp/{{ .Values.service.archiveVolume }}/{{ .Values.service.archiveFolder }}
+              value: /tmp/backup/{{ .Values.service.archiveFolder }}
             - name: JUJU_DATA
-              value: /tmp/{{ .Values.service.archiveVolume }}/juju
+              value: /tmp/backup/juju
             volumeMounts:
             - name: backup
-              mountPath: /tmp/{{ .Values.service.archiveVolume }}
+              mountPath: /tmp/backup
           restartPolicy: Never
           volumes:
           - name: backup

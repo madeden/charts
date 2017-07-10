@@ -25,7 +25,7 @@ spec:
           initContainers:
           - name: housekeeper
             image: busybox
-            command: [ "sh", "-c", "find /tmp/mongodump/mongo -name '{{ .Values.mongodb.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+4 | xargs rm -f" ] 
+            command: [ "sh", "-c", "find /tmp/mongodump/mongo -name '{{ .Values.service.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+{{ add .Values.service.archiveHistory 1 }} | xargs rm -f" ] 
             volumeMounts:
             - name: mongodump
               mountPath: /tmp/mongodump
@@ -35,7 +35,7 @@ spec:
 {{ toYaml .Values.resources | indent 14 }}
             image: {{.Values.image.repository }}:{{.Values.image.tag}}
             imagePullPolicy: {{.Values.image.pullPolicy }}
-            command: [ "/bin/bash", "-c", "mongodump --host {{ .Values.mongodb.host }} --port {{ .Values.mongodb.port }} --username ${USERNAME} --password ${PASSWORD} --archive=/tmp/mongodump/mongo/{{ .Values.mongodb.archiveNamePrefix }}-$(date +%Y%m%d%H).gz  --authenticationDatabase admin --ssl --sslAllowInvalidCertificates --gzip"  ]
+            command: [ "/bin/bash", "-c", "mongodump --host {{ .Values.mongodb.host }} --port {{ .Values.mongodb.port }} --username ${USERNAME} --password ${PASSWORD} --archive=/tmp/mongodump/mongo/{{ .Values.service.archiveNamePrefix }}-$(date +%Y%m%d%H).gz  --authenticationDatabase admin --ssl --sslAllowInvalidCertificates --gzip"  ]
             env:
             # Reading credentials from secret
             - name: "USERNAME"

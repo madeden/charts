@@ -8,6 +8,9 @@ image:
   pullPolicy: IfNotPresent
 service:
   schedule: "* 0 * * *"
+  archiveHistory: 4
+  # note: name of archive will be archiveNamePrefix-YYYYMMDDHH
+  archiveNamePrefix: mongodump 
 mongodb:
   credentials: 
     # On a Juju Controller, username can be found with 
@@ -19,8 +22,6 @@ mongodb:
     password: bar
   host: 127.0.0.1
   port: 37017
-  # note: name of archive will be archiveNamePrefix-YYYYMMDDHH
-  archiveNamePrefix: mongodump 
 resources: 
   requests:
    cpu: 100m
