@@ -1,0 +1,32 @@
+# Default values for etcd.
+image:
+  # Images to look for: https://hub.docker.com/r/samnco/juju-etcd-backup
+  repository: samnco/juju-agent 
+  tag: 2.2.0
+  pullPolicy: Always
+service:
+  schedule: "58 * * * *"
+  archiveVolume: etcddump
+  archiveFolder: etcd
+  archiveNamePrefix: etcddump 
+  archiveHistory: 4
+juju:
+  # Juju mode to use
+  model: default
+  # Index of the unit to do the backup from
+  application: etcd
+  unit: 0
+  # note: name of archive will be archiveNamePrefix-YYYYMMDDHH
+  command: [ "/bin/bash", "-c", "/usr/bin/etcddump.sh"  ]
+resources: 
+  requests:
+   cpu: 100m
+   memory: 128Mi
+  limits:
+   cpu: 200m
+   memory: 512Mi
+persistence:
+  enabled: true
+  # If persistence is enabled and existingClaim is not set then will 
+  # default to fullname
+  existingClaim: backup

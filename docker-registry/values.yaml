@@ -1,0 +1,43 @@
+# Default values for docker-registry.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: registry
+  tag: 2
+  pullPolicy: IfNotPresent
+service:
+  name: docker-registry
+  type: ClusterIP
+  externalPort: 5000
+  internalPort: 5000
+  # To create the htPasswd file, see enc-htpasswd.sh in the example folder
+  htPasswd: |-
+    kubernetes:$2y$05$2dIQ/HwBJWZfmbZut8J7yeuECUXMDhVWTtWQIMKDFoy589mL.myOS
+ingress:
+  enabled: false
+  hosts: 
+  - docker-registry.local
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    certificate: |-
+      public 
+      certificate
+      in PEM format
+    key: |-
+      private 
+      key
+      in PEM format
+resources: 
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 2000m
+    memory: 4096Mi
+persistence:
+  enabled: false
+  # If persistence is enabled and existingClaim is not set then will 
+  # default to fullname
+  existingClaim: docker-registry

@@ -1,0 +1,64 @@
+# CronJob definition to run every day
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{.Release.Namespace}}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    release: {{.Release.Name | quote }}
+  annotations:
+    "helm.sh/created": {{.Release.Time.Seconds | quote }}
+spec:
+  schedule: {{ .Values.service.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 14
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      template: 
+        spec:
+          initContainers:
+          - name: housekeeper
+            image: busybox
+            command: [ "sh", "-c", "find /tmp/{{ .Values.service.archiveVolume }}/{{ .Values.service.archiveFolder }} -name '{{ .Values.service.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+{{ add .Values.service.archiveHistory 1 }} | xargs rm -f" ]
+            volumeMounts:
+            - name: backup
+              mountPath: /tmp/{{ .Values.service.archiveVolume }}
+          containers:
+          - name: juju
+            resources:
+{{ toYaml .Values.resources | indent 14 }}
+            image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+            imagePullPolicy: {{.Values.image.pullPolicy }}
+            command: {{ .Values.juju.command }}
+            env:
+            # Reading credentials from secret
+            - name: "MODEL"
+              value: {{ .Values.juju.model }}
+            - name: "APPLICATION"
+              value: {{ .Values.juju.application }}
+            - name: "PASSWORD"
+              value: {{ .Values.juju.unit | quote }}
+            - name: "PREFIX"
+              value: {{ .Values.service.archiveNamePrefix }}
+            - name: "TARGET_DIR"
+              value: /tmp/{{ .Values.service.archiveVolume }}/{{ .Values.service.archiveFolder }}
+            - name: JUJU_DATA
+              value: /tmp/{{ .Values.service.archiveVolume }}/juju
+            volumeMounts:
+            - name: backup
+              mountPath: /tmp/{{ .Values.service.archiveVolume }}
+          restartPolicy: Never
+          volumes:
+          - name: backup
+          {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
+          {{- else }}
+            emptyDir: {}
+          {{- end -}}

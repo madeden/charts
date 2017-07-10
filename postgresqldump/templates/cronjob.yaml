@@ -1,0 +1,62 @@
+# CronJob definition to run every day
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{.Release.Namespace}}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    release: {{.Release.Name | quote }}
+  annotations:
+    "helm.sh/created": {{.Release.Time.Seconds | quote }}
+spec:
+  schedule: {{ .Values.service.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 14
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      template: 
+        spec:
+          initContainers:
+          - name: housekeeper
+            image: busybox
+            command: [ "sh", "-c", "find /tmp/postgresqldump/postgresql -name '{{ .Values.postgresqldb.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+4 | xargs rm -f" ] 
+            volumeMounts:
+            - name: postgresqldump
+              mountPath: /tmp/postgresqldump
+          containers:
+          - name: postgresqldump
+            resources:
+{{ toYaml .Values.resources | indent 14 }}
+            image: {{.Values.image.repository }}:{{.Values.image.tag}}
+            imagePullPolicy: {{.Values.image.pullPolicy }}
+            command: [ "/bin/bash", "-c", "pg_dump --dbname=postgresql://${USERNAME}:${PASSWORD}@{{.Values.postgresqldb.host}}:{{.Values.postgresqldb.port}}/{{.Values.postgresqldb.dbname}} | gzip > /tmp/postgresqldump/postgresql/{{ .Values.postgresqldb.archiveNamePrefix }}-$(date +%Y%m%d%H).gz"  ]
+            env:
+            # Reading credentials from secret
+            - name: "USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql-credentials
+                  key: username
+            - name: "PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql-credentials
+                  key: password
+            volumeMounts:
+            - name: postgresqldump
+              mountPath: /tmp/postgresqldump
+          restartPolicy: Never
+          volumes:
+          - name: postgresqldump
+          {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
+          {{- else }}
+            emptyDir: {}
+          {{- end -}}

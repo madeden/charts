@@ -1,0 +1,12 @@
+apiVersion: v1
+description: A Helm chart to deploy a Docker Registry
+name: docker-registry
+version: 0.1.0
+maintainers:
+- email: samuel.cozannet@madeden.com
+  name: Private Registry
+engine: gotpl
+home: http://www.docker.com/
+icon: https://www.docker.com/sites/default/files/vertical_large.png
+keywords:
+- registry

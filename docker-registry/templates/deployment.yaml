@@ -1,0 +1,80 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/created": {{.Release.Time.Seconds | quote }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name | quote }}
+        kubernetes.io/cluster-service: "true"
+    spec:
+      {{ if not .Values.ingress.enabled }}
+      hostNetwork: true
+      {{ end }}
+      containers:
+      - name: registry
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        env:
+        - name: REGISTRY_HTTP_ADDR
+          value: "0.0.0.0:{{ .Values.service.internalPort }}"
+        - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+          value: /var/lib/registry
+        - name: REGISTRY_AUTH_HTPASSWD_REALM
+          value: basic_realm
+        - name: REGISTRY_AUTH_HTPASSWD_PATH
+          value: /auth/htpasswd
+        {{ if not .Values.ingress.enabled }}
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: /certs/tls.crt
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: /certs/tls.key
+        {{ end }}
+        volumeMounts:
+        - name: image-store
+          mountPath: /var/lib/registry
+        - name: auth-dir
+          mountPath: /auth
+        {{ if not .Values.ingress.enabled }}
+        - name: tls-data
+          value: /certs
+        {{ end }}
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: {{ .Values.service.internalPort }}
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: {{ .Values.service.internalPort }}
+      volumes:
+      - name: auth-dir
+        secret:
+          secretName: {{ template "fullname" . }}-auth-data
+      {{ if not .Values.ingress.enabled }}
+      - name: tls-data
+        secret:
+          secretName: {{ template "fullname" . }}-tls-data
+      {{ end }}
+      - name: image-store
+      {{ if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
+      {{ else }}
+        emptyDir: {}
+      {{ end -}}

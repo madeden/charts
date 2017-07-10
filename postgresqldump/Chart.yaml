@@ -1,0 +1,14 @@
+apiVersion: v1
+description: PostgresqlDB Dump orchestration
+engine: gotpl
+home: http://www.madeden.com/
+icon: http://logonoid.com/images/postgresql-logo.png
+name: postgresqldump
+keywords:
+- operations
+maintainers:
+- email: samuel.cozannet@madeden.com
+  name: Samuel Cozannet
+sources:
+- http://github.com/madeden/charts
+version: 1.0.0

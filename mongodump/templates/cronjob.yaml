@@ -1,0 +1,62 @@
+# CronJob definition to run every day
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{.Release.Namespace}}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    release: {{.Release.Name | quote }}
+  annotations:
+    "helm.sh/created": {{.Release.Time.Seconds | quote }}
+spec:
+  schedule: {{ .Values.service.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 14
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      template: 
+        spec:
+          initContainers:
+          - name: housekeeper
+            image: busybox
+            command: [ "sh", "-c", "find /tmp/mongodump/mongo -name '{{ .Values.mongodb.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+4 | xargs rm -f" ] 
+            volumeMounts:
+            - name: mongodump
+              mountPath: /tmp/mongodump
+          containers:
+          - name: mongodump
+            resources:
+{{ toYaml .Values.resources | indent 14 }}
+            image: {{.Values.image.repository }}:{{.Values.image.tag}}
+            imagePullPolicy: {{.Values.image.pullPolicy }}
+            command: [ "/bin/bash", "-c", "mongodump --host {{ .Values.mongodb.host }} --port {{ .Values.mongodb.port }} --username ${USERNAME} --password ${PASSWORD} --archive=/tmp/mongodump/mongo/{{ .Values.mongodb.archiveNamePrefix }}-$(date +%Y%m%d%H).gz  --authenticationDatabase admin --ssl --sslAllowInvalidCertificates --gzip"  ]
+            env:
+            # Reading credentials from secret
+            - name: "USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mongodb-credentials
+                  key: username
+            - name: "PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mongodb-credentials
+                  key: password
+            volumeMounts:
+            - name: mongodump
+              mountPath: /tmp/mongodump
+          restartPolicy: Never
+          volumes:
+          - name: mongodump
+          {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
+          {{- else }}
+            emptyDir: {}
+          {{- end -}}

@@ -1,0 +1,5 @@
+This chart runs a backup of a Juju deployed etcd database following a schedule. 
+
+It wil expect the backup directory to contain a "juju" folder that contains 
+the whole ~/.local/share/juju of a working juju client for the target environment. 
+

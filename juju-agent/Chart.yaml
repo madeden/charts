@@ -1,0 +1,13 @@
+apiVersion: v1
+description: Juju Agent orchestration
+engine: gotpl
+home: http://www.madeden.com/
+keywords:
+- operations
+maintainers:
+- email: samuel.cozannet@madeden.com
+  name: Samuel Cozannet
+name: juju-agent
+sources:
+- http://github.com/madeden/charts
+version: 1.0.0

@@ -1,0 +1,14 @@
+apiVersion: v1
+description: MongoDB Dump orchestration
+engine: gotpl
+home: http://www.madeden.com/
+icon: https://media.mongodb.org/ico/icon-leaf.png
+name: mongodump
+keywords:
+- operations
+maintainers:
+- email: samuel.cozannet@madeden.com
+  name: Samuel Cozannet
+sources:
+- http://github.com/madeden/charts
+version: 1.0.0

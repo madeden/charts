@@ -1,0 +1,35 @@
+# Default values for mongodump.
+image:
+  # Images to look for: https://hub.docker.com/_/mongo/
+  repository: mongo
+  # This is the version for Juju at this time
+  # check with "dpkg -l | grep juju" on any of the juju nodes
+  tag: 3.2
+  pullPolicy: IfNotPresent
+service:
+  schedule: "* 0 * * *"
+mongodb:
+  credentials: 
+    # On a Juju Controller, username can be found with 
+    #  conf=/var/lib/juju/agents/machine-<controller-ID>/agent.conf
+    #  sudo grep tag $conf | cut -d' ' -f2
+    username: foo
+    # On a Juju Controller, password can be found with 
+    #  sudo grep statepassword $conf | cut -d' ' -f2
+    password: bar
+  host: 127.0.0.1
+  port: 37017
+  # note: name of archive will be archiveNamePrefix-YYYYMMDDHH
+  archiveNamePrefix: mongodump 
+resources: 
+  requests:
+   cpu: 100m
+   memory: 128Mi
+  limits:
+   cpu: 200m
+   memory: 512Mi
+persistence:
+  enabled: false
+  # If persistence is enabled and existingClaim is not set then will 
+  # default to fullname
+  existingClaim: backup

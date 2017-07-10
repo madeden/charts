@@ -1,0 +1,36 @@
+# Default values for postgresqldump.
+image:
+  # Images to look for: https://hub.docker.com/_/postgres/
+  repository: postgres 
+  # This is the version for Maas at this time
+  # check with "dpkg -l | grep postgres" on any of the juju nodes
+  tag: 9.5
+  pullPolicy: IfNotPresent
+service:
+  schedule: "* 0 * * *"
+postgresqldb:
+  credentials: 
+    # On a Maas Controller, username can be found with 
+    #  conf=/etc/maas/regiond.conf
+    #  sudo grep user $conf | cut -d' ' -f2
+    username: foo
+    # On a Juju Controller, password can be found with 
+    #  sudo grep pass $conf | cut -d' ' -f2
+    password: bar
+  host: 127.0.0.1
+  port: 37017
+  dbname: maasdb
+  # note: name of archive will be archiveNamePrefix-YYYYMMDDHH
+  archiveNamePrefix: postgresqldump 
+resources: 
+  requests:
+   cpu: 100m
+   memory: 128Mi
+  limits:
+   cpu: 200m
+   memory: 512Mi
+persistence:
+  enabled: true
+  # If persistence is enabled and existingClaim is not set then will 
+  # default to fullname
+  existingClaim: backup
