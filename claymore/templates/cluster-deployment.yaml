@@ -20,6 +20,8 @@
 {{- $ethi := .Values.claymoreCluster.settings.ethi -}}
 {{- $resources := .Values.claymoreCluster.resources -}}
 {{- $nodeSelector := .Values.claymoreCluster.settings.nodeSelector -}}
+{{- $gpuType := .Values.moneroCluster.settings.gpuType -}}
+
 ---
 # Defining a generic configuration file for the cluster
 apiVersion: v1
@@ -94,14 +96,24 @@ spec:
     spec:
       containers:
       - name: claymore-miner
-        image: {{ $repo }}/{{ $image }}:{{ $tag }}
+        image: {{ $repo }}/{{ $image }}:{{ $tag }}-{{ $gpuType }}
+        {{ if eq $gpuType "amd" }}
+        securityContext:
+          privileged: true
+        {{ end }}
         resources:
           requests:
-{{ toYaml $resources.requests | indent 12 }}
+            cpu: {{ $cpusPerWorker }}000m
+            memory: 1024Mi
+            {{ if eq $gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
+            {{ end }}
           limits:
-{{ toYaml $resources.limits | indent 12 }}           
+            cpu: {{ mul 2 $cpusPerWorker }}000m
+            memory: 1024Mi
+            {{ if eq $gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
+            {{ end }}
         command: [ "/entrypoint.sh" ]
         ports:
         - name: claymore-miner
@@ -127,27 +139,48 @@ spec:
           value: {{ $ethi | quote }}
         - name: MODE
           value: {{ $mode | quote }}
+        {{ if eq $gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
+        {{ end }}
+        {{ if eq $gpuType "amd" }}
+        - name: LD_LIBRARY_PATH
+          value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
+        {{ end }}
         volumeMounts:
+        {{ if eq $gpuType "nvidia" }}
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
           name: lib
         - mountPath: /usr/lib/cuda
           name: libcuda
+        {{ end }}
+        {{ if eq $gpuType "amd" }}
+        - mountPath: /dev/dri
+          name: dri
+        {{ end }}
       volumes:
+      {{ if eq $gpuType "nvidia" }}
       - name: bin
-        hostPath: 
+        hostPath:
           path: /usr/lib/nvidia-375/bin
       - name: lib
-        hostPath: 
+        hostPath:
           path: /usr/lib/nvidia-375
       - name: libcuda
-        hostPath: 
+        hostPath:
           path: /usr/lib/x86_64-linux-gnu
-      nodeSelector:
+      {{ end }}
+      {{ if eq $gpuType "amd" }}
+      - name: dri
+        hostPath:
+          path: /dev/dri
+      {{ end }}
+      {{ if ne $nodeSelector "*" }}
+      nodeSelector: 
         kubernetes.io/gpu-name: {{ $nodeSelector }}
+      {{ end }}
 ---
 {{ end }}
 {{ end }}

@@ -9,7 +9,7 @@ image:
 service:
   schedule: "* 0 * * *"
   archiveHistory: 4
-  archiveNamePrefix: postgresqldump 
+  archiveNamePrefix: pgdump 
 postgresqldb:
   credentials: 
     # On a Maas Controller, username can be found with 

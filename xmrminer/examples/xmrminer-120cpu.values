@@ -11,7 +11,7 @@ moneroCluster:
   settings:
     clusterName: cpu
     nodes: 3
-    workersPerNode: 36
+    workersPerNode: 10
     cpusPerWorker: 1
     gpuType: cpu
     nodeSelector: "*"

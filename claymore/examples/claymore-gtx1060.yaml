@@ -14,6 +14,7 @@ claymoreCluster:
   settings:
     nodeSelector: GeForce-GTX-1060-6GB
     nodes: "3"
+    gpuType: nvidia
     nbGpuPerNode: "1"
     di: detect
     gser: "0"

@@ -24,8 +24,13 @@ spec:
         spec:
           initContainers:
           - name: housekeeper
+          {{ if eq {{ .Values.juju.model }} "controller" }}
+            image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+            command: [ "sh", "-c", "/usr/bin/controller-housekeeper.sh {{ add .Values.service.archiveHistory 1 }}" ]
+          {{ else }}
             image: busybox
             command: [ "sh", "-c", "find /tmp/backup/{{ .Values.service.archiveFolder }} -name '{{ .Values.service.archiveNamePrefix }}*' 2>/dev/null | sort -r | tail -n+{{ add .Values.service.archiveHistory 1 }} | xargs rm -f" ]
+          {{ end }}
             volumeMounts:
             - name: backup
               mountPath: /tmp/backup
@@ -35,7 +40,7 @@ spec:
 {{ toYaml .Values.resources | indent 14 }}
             image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
             imagePullPolicy: {{.Values.image.pullPolicy }}
-            command: [ "/bin/bash", "-c", "/usr/bin/{{- if eq .Values.juju.application 'etcd' -}}etcddump.sh{{- else if eq .Values.juju.application 'easyrsa' -}}pkidump.sh{{- else -}}cdkdump.sh{{- end -}}" ]
+            command: [ "/bin/bash", "-c", "/usr/bin/{{- if eq {{ .Values.juju.model }} 'controller' -}}controllerdump.sh{{- else if eq .Values.juju.application 'etcd' -}}etcddump.sh{{- else if eq .Values.juju.application 'easyrsa' -}}pkidump.sh{{- else -}}cdkdump.sh{{- end -}}" ]
             env:
             # Reading credentials from secret
             - name: "MODEL"

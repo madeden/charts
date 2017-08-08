@@ -3,7 +3,7 @@ description: PostgresqlDB Dump orchestration
 engine: gotpl
 home: http://www.madeden.com/
 icon: http://logonoid.com/images/postgresql-logo.png
-name: postgresqldump
+name: pgdump
 keywords:
 - operations
 maintainers:

@@ -10,7 +10,7 @@ service:
   archiveNamePrefix: etcddump 
   archiveHistory: 4
 juju:
-  # Juju mode to use
+  # Juju mode to use. If set to controller, will perform a full backup of the controller
   model: default
   # Index of the unit to do the backup from
   # must be easyrsa, etcd or kubernetes-master. 
