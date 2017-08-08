@@ -16,7 +16,6 @@ claymoreCluster:
     nodes: "3"
     gpuType: nvidia
     nbGpuPerNode: "1"
-    cpusPerWorker: 1
     di: detect
     gser: "0"
     mode: "1"
@@ -25,13 +24,6 @@ claymoreCluster:
     epsw: x
     esm: "0"
     ethi: "16"
-  resources:
-    requests:
-      cpu: 100m
-      memory: 512Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
 
 ethmon:
   replicaCount: 1

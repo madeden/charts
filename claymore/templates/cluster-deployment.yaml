@@ -21,7 +21,6 @@
 {{- $resources := .Values.claymoreCluster.resources -}}
 {{- $nodeSelector := .Values.claymoreCluster.settings.nodeSelector -}}
 {{- $gpuType := .Values.claymoreCluster.settings.gpuType -}}
-{{- $cpusPerWorker := ( int .Values.claymoreCluster.settings.cpusPerWorker) -}}
 
 ---
 # Defining a generic configuration file for the cluster
@@ -104,13 +103,13 @@ spec:
         {{ end }}
         resources:
           requests:
-            cpu: {{ $cpusPerWorker }}000m
+            cpu: 100m
             memory: 1024Mi
             {{ if eq $gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
           limits:
-            cpu: {{ mul 2 $cpusPerWorker }}000m
+            cpu: 500m
             memory: 1024Mi
             {{ if eq $gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
