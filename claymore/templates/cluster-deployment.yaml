@@ -20,7 +20,8 @@
 {{- $ethi := .Values.claymoreCluster.settings.ethi -}}
 {{- $resources := .Values.claymoreCluster.resources -}}
 {{- $nodeSelector := .Values.claymoreCluster.settings.nodeSelector -}}
-{{- $gpuType := .Values.moneroCluster.settings.gpuType -}}
+{{- $gpuType := .Values.claymoreCluster.settings.gpuType -}}
+{{- $cpusPerWorker := ( int .Values.claymoreCluster.settings.cpusPerWorker) -}}
 
 ---
 # Defining a generic configuration file for the cluster

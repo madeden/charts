@@ -15,6 +15,7 @@ claymoreCluster:
     nodeSelector: Quadro-P5000
     nodes: "3"
     nbGpuPerNode: "1"
+    cpusPerWorker: 1
     di: detect
     gser: "0"
     mode: "1"

@@ -16,6 +16,7 @@ claymoreCluster:
     nodes: "3"
     gpuType: nvidia
     nbGpuPerNode: "1"
+    cpusPerWorker: 1
     di: detect
     gser: "0"
     mode: "1"
