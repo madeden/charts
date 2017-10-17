@@ -12,8 +12,8 @@ claymoreCluster:
     name: claymore-miner
     dockerTag: 9.7
   settings:
-    nodeSelector: Quadro-P5000
-    nodes: "3"
+    nodeSelector: AMD-Radeon-RX580
+    nodes: "1"
     nbGpuPerNode: "1"
     di: detect
     gser: "0"

@@ -56,7 +56,7 @@ spec:
       containers:
       - name: xmr-miner-{{ $clusterName }}
         image: {{ $repo }}/{{ $image }}:{{ $tag }}-{{ $gpuType }}
-        command: [ "/usr/bin/xmr-stak-{{ $gpuType }}" ]
+        command: [ "/usr/bin/xmr-stak-sigint" ]
         {{ if eq $gpuType "amd" }}
         securityContext:
           privileged: true
