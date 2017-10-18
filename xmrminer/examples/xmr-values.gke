@@ -1,0 +1,41 @@
+global:
+  imagePullPolicy: IfNotPresent
+
+moneroCluster:
+  service:
+    name: xmr-cpu
+  image: 
+    repo: samnco
+    name: xmrminer
+    dockerTag: 1.5.0
+  settings:
+    clusterName: cpu
+    nodes: 3
+    workersPerNode: 2
+    cpusPerWorker: 1
+    gpuType: cpu
+    nodeSelector: "*"
+  configMap: |-
+    "cpu_threads_conf" : 
+    [ 
+      { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 0 },
+    ],
+    "use_slow_memory" : "warn",
+    "nicehash_nonce" : false,
+    "aes_override" : null,
+    "use_tls" : false,
+    "tls_secure_algo" : true,
+    "tls_fingerprint" : "",
+    "pool_address" : "pool.supportxmr.com:5555",
+    "wallet_address" : "4GdoN7NCTi8a5gZug7PrwZNKjvHFmKeV11L6pNJPgj5QNEHsN6eeX3DaAQFwZ1ufD4LYCZKArktt113W7QjWvQ7CW9YZRapBW6vAuZ73md",
+    "pool_password" : "x",
+    "call_timeout" : 10,
+    "retry_time" : 10,
+    "giveup_limit" : 0,
+    "verbose_level" : 3,
+    "h_print_time" : 60,
+    "daemon_mode" : false,
+    "output_file" : "",
+    "httpd_port" : 0,
+    "prefer_ipv4" : true,
+

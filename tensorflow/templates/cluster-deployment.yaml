@@ -122,10 +122,10 @@ spec:
       {{ if $isGpu }}
       - name: bin
         hostPath: 
-          path: /usr/lib/nvidia-375/bin
+          path: /usr/lib/nvidia-384/bin
       - name: lib
         hostPath: 
-          path: /usr/lib/nvidia-375
+          path: /usr/lib/nvidia-384
       - name: libcuda
         hostPath: 
           path: /usr/lib/x86_64-linux-gnu
