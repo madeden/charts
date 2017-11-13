@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Development grade chart to deploy a simple NFS server on K8s
+name: nfs
+version: 0.1.0

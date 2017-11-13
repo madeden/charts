@@ -1,0 +1,23 @@
+# Separator name
+type: ktrn
+
+# What Benchmarks do we want to run? 
+benchmark: 
+  name: pts/foo
+  type: suite/test
+
+# How many times do we run each benchmark
+parallelism: 3
+
+# Do we want to burst. If yes, resource limit will double request. 
+burst: true
+resources:
+  requests:
+    cpu: "4"
+    memory: 8Gi
+  max:
+    cpu: "16"
+
+# Is this a GPU Benchmark? If true, inidicate the type of GPU nvidia or amd
+gpuType: false
+

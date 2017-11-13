@@ -1,0 +1,5 @@
+Thanks for deploying NFS. Your shared repository is available at: 
+
+1. Inside of the cluster: 
+
+  smb://{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local

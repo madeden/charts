@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Phoronix Test Suite chart to automate benchmarking in Kubernetes
+name: pts
+version: 0.1.0

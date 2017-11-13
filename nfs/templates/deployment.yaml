@@ -1,0 +1,62 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      {{ if .Values.hostNetwork }}
+      hostNetwork: true
+      {{ end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: exports
+          mountPath: /exports
+        ports:
+        - containerPort: {{ .Values.service.nfsInternalPort | quote }}
+          name: nfs
+        - containerPort: {{ .Values.service.mountdInternalPort | quote }}
+          name: mountd
+        - containerPort: {{ .Values.service.rpcbindInternalPort | quote }}
+          name: rpcbind
+        readinessProbe:
+          tcpSocket: 
+            port: {{ .Values.service.nfsInternalPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.service.nfsInternalPort }}
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+  {{ toYaml .Values.resources | indent 8}}
+      {{- if .Values.nodeSelector }}
+        nodeSelector:
+  {{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
+        volumes:
+        - name: exports
+        {{- if and .Values.persistence.enabled (not .Values.persistence.hostPath) }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
+        {{- else if and (not .Values.persistence.enabled) .Values.persistence.hostPath }}
+          hostPath: 
+            path: {{ .Values.persistence.hostPath }}
+            type: DirectoryOrCreate
+        {{ else }} 
+          emptyDir: {}
+        {{- end -}}

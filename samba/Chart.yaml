@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Development grade chart to deploy a simple Samba server on K8s
+name: samba
+version: 0.1.0
