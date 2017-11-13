@@ -10,9 +10,7 @@ spec:
   nfs:
     server: {{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
     path: "/"
-
 ---
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

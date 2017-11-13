@@ -1,0 +1,21 @@
+# Separator name
+type: ktrn
+
+image: samnco:openalpr
+
+# How many times do we run each benchmark
+parallelism: 1
+
+# Do we want to burst. If yes, resource limit will double request. 
+burst: true
+resources:
+  requests:
+    cpu: "4"
+    memory: 8Gi
+  max:
+    cpu: "16"
+
+# Is this a GPU Benchmark? If true, inidicate the type of GPU nvidia or amd
+gpuType: false
+
+imageFolder: /data
