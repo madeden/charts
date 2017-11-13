@@ -38,6 +38,8 @@ spec:
         #   value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
         # {{ end }}
         volumeMounts:
+        - name: {{ $release }}-config
+          mountPath: /etc/openalpr
         - mountPath: /in
           name: hostpath
         {{ if eq $gpuType "nvidia" }}
@@ -67,6 +69,9 @@ spec:
             {{ end }}
       restartPolicy: Never
       volumes:
+      - name: {{ $release }}-config
+        configMap:
+          name: {{ $release }}-config
       - name: hostpath
         hostPath:
           path: {{ $imageFolder }}
@@ -86,7 +91,6 @@ spec:
       #   hostPath:
       #     path: /dev/dri
       # {{ end }}
-
 ---
 {{- end }}
 # {{- end }}

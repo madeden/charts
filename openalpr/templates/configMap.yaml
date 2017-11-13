@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: {{ template "fullname" . }}
+    heritage: {{.Release.Service | quote }}
+    chart: {{.Chart.Name}}-{{.Chart.Version}}
+    release: {{ .Release.Name | quote }}
+data:
+  config.txt: |-
+{{ .Values.openalprConfig | indent 4 }}

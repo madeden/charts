@@ -26,11 +26,11 @@ spec:
         - name: exports
           mountPath: /exports
         ports:
-        - containerPort: {{ .Values.service.nfsInternalPort | quote }}
+        - containerPort: {{ .Values.service.nfsInternalPort }}
           name: nfs
-        - containerPort: {{ .Values.service.mountdInternalPort | quote }}
+        - containerPort: {{ .Values.service.mountdInternalPort }}
           name: mountd
-        - containerPort: {{ .Values.service.rpcbindInternalPort | quote }}
+        - containerPort: {{ .Values.service.rpcbindInternalPort }}
           name: rpcbind
         readinessProbe:
           tcpSocket: 
@@ -43,10 +43,10 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 20
         resources:
-  {{ toYaml .Values.resources | indent 8}}
+  {{ toYaml .Values.resources | indent 10}}
       {{- if .Values.nodeSelector }}
         nodeSelector:
-  {{ toYaml .Values.nodeSelector | indent 8 }}
+  {{ toYaml .Values.nodeSelector | indent 10 }}
       {{- end }}
         volumes:
         - name: exports
