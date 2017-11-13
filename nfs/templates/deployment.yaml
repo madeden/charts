@@ -45,18 +45,18 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10}}
       {{- if .Values.nodeSelector }}
-        nodeSelector:
+      nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 10 }}
       {{- end }}
-        volumes:
-        - name: exports
-        {{- if and .Values.persistence.enabled (not .Values.persistence.hostPath) }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
-        {{- else if and .Values.persistence.enabled .Values.persistence.hostPath }}
-          hostPath: 
-            path: {{ .Values.persistence.hostPath }}
-            type: DirectoryOrCreate
-        {{ else }} 
-          emptyDir: {}
-        {{- end -}}
+      volumes:
+      - name: exports
+      {{- if and .Values.persistence.enabled (not .Values.persistence.hostPath) }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.existingClaim | default (include "fullname" .) }}
+      {{- else if and .Values.persistence.enabled .Values.persistence.hostPath }}
+        hostPath: 
+          path: {{ .Values.persistence.hostPath }}
+          type: DirectoryOrCreate
+      {{ else }} 
+        emptyDir: {}
+      {{- end -}}
