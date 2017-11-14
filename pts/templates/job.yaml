@@ -79,7 +79,7 @@ spec:
       {{ end }}
       - name: config
         configMap:
-          name: {{ $release }}-config
+          name: {{ $release }}-{{ $chart }}-config
           items: 
           - key: phoronix-test-suite.xml
             path: phoronix-test-suite.xml
