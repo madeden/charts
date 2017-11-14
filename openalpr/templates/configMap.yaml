@@ -9,5 +9,5 @@ metadata:
     chart: {{.Chart.Name}}-{{.Chart.Version}}
     release: {{ .Release.Name | quote }}
 data:
-  config.txt: |-
+  openalpr.conf: |-
 {{ .Values.openalprConfig | indent 4 }}
