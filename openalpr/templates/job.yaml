@@ -9,6 +9,8 @@
 {{- $dockerImage := .Values.image -}}
 {{- $gpuType := .Values.gpuType -}}
 {{- $imageFolder := .Values.imageFolder -}}
+{{- $storname := .Values.storage.name -}}
+{{- $command := .Values.command -}}
 
 ---
 # {{- range $index, $benchmark := .Values.benchmarks }}
@@ -16,7 +18,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $type | lower }}-{{ $parallelism }}-{{ $cpu | lower }}-{{ $memory | lower }}-{{ $job }}
+  name: {{ $type | lower }}-{{ $parallelism }}-{{ $cpu | lower }}-{{ $memory | lower }}-{{ $gpuType | lower }}-{{ $job }}
 spec:
   parallelism: 1
   template:
@@ -27,9 +29,13 @@ spec:
       containers:
       - name: {{ $benchmark | replace "/" "-" | lower }}-{{ $job }}
         image: {{- $dockerImage -}}:{{- if eq $gpuType "nvidia" -}}latest-3.3.1-16.04-cuda-2{{- else -}}latest-3.3.1-16.04-nocuda{{- end -}}
-        args: [ "openalpr-utils-benchmark", "us", "speed", "/in", "/out" ]
+        command: {{ $command }}
         env:
-        {{ if eq $gpuType "nvidia" }}
+        - name: JOB_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: {{ $type | lower }}-{{ $parallelism }}-{{ $cpu | lower }}-{{ $memory | lower }}-{{ $gpuType | lower }}-{{ $job }}
+       {{ if eq $gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         {{ end }}
@@ -40,8 +46,8 @@ spec:
         volumeMounts:
         - name: {{ $release }}-config
           mountPath: /etc/openalpr
-        - mountPath: /in
-          name: hostpath
+        - name: {{ $storname }}
+          mountPath: /data
         {{ if eq $gpuType "nvidia" }}
         - mountPath: /usr/local/nvidia/bin
           name: bin
@@ -72,9 +78,9 @@ spec:
       - name: {{ $release }}-config
         configMap:
           name: {{ $release }}-config
-      - name: hostpath
-        hostPath:
-          path: {{ $imageFolder }}
+      - name: {{ $storname }}
+        persistentVolumeClaim:
+          claimName: {{ $storname }}
       {{ if eq $gpuType "nvidia" }}
       - name: bin
         hostPath:

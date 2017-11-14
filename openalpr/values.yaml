@@ -18,7 +18,10 @@ resources:
 # Is this a GPU Benchmark? If true, inidicate the type of GPU nvidia or amd
 gpuType: false
 
-imageFolder: /data
+command: [ "/data/run_alpr.sh" ]
+
+storage:
+  name: nfs-nfs
 
 openalprConfig: |-
   runtime_dir = ${CMAKE_INSTALL_PREFIX}/share/openalpr/runtime_data
@@ -35,7 +38,7 @@ openalprConfig: |-
   ; lbpgpu    - LBP-based detector that uses Nvidia GPU to increase recognition speed.
   ; lbpopencl - LBP-based detector that uses OpenCL GPU to increase recognition speed.  Requires OpenCV 3.0
   ; morphcpu  - Experimental detector that detects white rectangles in an image.  Does not require training.
-  detector = lbpgpu
+  detector = lbpcpu
   must_match_pattern = 0
   skip_detection = 0
   detection_mask_image = 
