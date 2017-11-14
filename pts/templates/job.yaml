@@ -30,7 +30,7 @@ spec:
       containers:
       - name: {{ .name | replace "/" "-" | lower }}
         image: {{ .image }}
-        command: [ "phoronix-test-suite", "batch-run", {{ .name | quote }}]
+        command: [ "bash", "-c", "phoronix-test-suite batch-run {{ .name }}"]
         env:
         {{ if eq .gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
@@ -79,7 +79,7 @@ spec:
       {{ end }}
       - name: config
         configMap:
-          name: {{ $release }}-{{ $chart }}-config
+          name: {{ $release }}-{{ $chartName }}-config
           items: 
           - key: phoronix-test-suite.xml
             path: phoronix-test-suite.xml
