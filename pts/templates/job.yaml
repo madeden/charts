@@ -30,8 +30,10 @@ spec:
       containers:
       - name: {{ .name | replace "/" "-" | lower }}
         image: {{ .image }}
-        command: [ "bash", "-c", "phoronix-test-suite batch-run {{ .name }}"]
+        command: [ "/var/lib/phoronix-test-suite/run-test.sh"  ]
         env:
+        - name: TEST
+          value: {{ .name | quote }}
         {{ if eq .gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
