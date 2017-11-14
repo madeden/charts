@@ -26,13 +26,13 @@ spec:
         - name: shared
           mountPath: /shared
         ports:
-        - containerPort: {{ .Values.service.internalSMBPort445 | quote }}
+        - containerPort: {{ .Values.service.internalSMBPort445 }}
           name: smb445
-        - containerPort: {{ .Values.service.internalSMBPort139 | quote }}
+        - containerPort: {{ .Values.service.internalSMBPort139 }}
           name: smb139
-        - containerPort: {{ .Values.service.internalNMBPort137 | quote }}
+        - containerPort: {{ .Values.service.internalNMBPort137 }}
           name: nmb137
-        - containerPort: {{ .Values.service.internalNMBPort138 | quote }}
+        - containerPort: {{ .Values.service.internalNMBPort138 }}
           name: nmb138
         readinessProbe:
           tcpSocket: 
@@ -44,8 +44,8 @@ spec:
             port: {{ .Values.service.internalSMBPort445 }}
           initialDelaySeconds: 15
           periodSeconds: 20
-      resources:
-{{ toYaml .Values.resources | indent 8}}
+        resources:
+{{ toYaml .Values.resources | indent 10}}
     {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
