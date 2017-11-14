@@ -1,24 +1,7 @@
-{{- $type := .Values.type -}}
-{{- $parallelism := .Values.parallelism -}}
-{{- $cpu := .Values.resources.requests.cpu -}}
-{{- $memory := .Values.resources.requests.memory -}}
-{{- $maxCpu := .Values.resources.max.cpu -}}
-{{- $requests := .Values.resources.requests -}}
-{{- $burst := .Values.burst -}}
-{{- $release := .Release.name -}}
-{{- $dockerImage := .Values.image -}}
-{{- $gpuType := .Values.gpuType -}}
-{{- $imageFolder := .Values.imageFolder -}}
-{{- $storname := .Values.storage.name -}}
-{{- $command := .Values.command -}}
-
----
-# {{- range $index, $benchmark := .Values.benchmarks }}
-{{- range $job, $nb := until (int .Values.parallelism) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $type | lower }}-{{ $parallelism }}-{{ $cpu | lower }}-{{ $memory | lower }}-{{ $gpuType | lower }}-{{ $job }}
+  name: {{ .Values.type | lower }}-{{ .Values.parallelism }}-{{ .Values.resources.requests.cpu | lower }}-{{ .Values.resources.requests.memory | lower }}-{{ .Values.gpuType | lower }}
 spec:
   parallelism: 1
   template:
@@ -27,28 +10,28 @@ spec:
         app: {{ template "fullname" . }}
     spec:
       containers:
-      - name: {{ $benchmark | replace "/" "-" | lower }}-{{ $job }}
-        image: {{- $dockerImage -}}:{{- if eq $gpuType "nvidia" -}}latest-3.3.1-16.04-cuda-2{{- else -}}latest-3.3.1-16.04-nocuda{{- end -}}
-        command: {{ $command }}
+      - name: openalpr
+        image: {{- .Values.image -}}:{{- if eq .Values.gpuType "nvidia" -}}latest-3.3.1-16.04-cuda-2{{- else -}}latest-3.3.1-16.04-nocuda{{- end -}}
+        command: {{ .Values.command }}
         env:
         - name: JOB_NAME
           valueFrom:
             fieldRef:
-              fieldPath: {{ $type | lower }}-{{ $parallelism }}-{{ $cpu | lower }}-{{ $memory | lower }}-{{ $gpuType | lower }}-{{ $job }}
-       {{ if eq $gpuType "nvidia" }}
+              fieldPath: {{ .Values.type | lower }}-{{ .Values.parallelism }}-{{ .Values.resources.requests.cpu | lower }}-{{ .Values.resources.requests.memory | lower }}-{{ .Values.gpuType | lower }}
+       {{ if eq .Values.gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         {{ end }}
-        # {{ if eq $gpuType "amd" }}
+        # {{ if eq .Values.gpuType "amd" }}
         # - name: LD_LIBRARY_PATH
         #   value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
         # {{ end }}
         volumeMounts:
-        - name: {{ $release }}-config
+        - name: {{ .Release.name }}-config
           mountPath: /etc/openalpr
-        - name: {{ $storname }}
+        - name: {{ .Values.storage.name }}
           mountPath: /data
-        {{ if eq $gpuType "nvidia" }}
+        {{ if eq .Values.gpuType "nvidia" }}
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
@@ -56,32 +39,30 @@ spec:
         - mountPath: /usr/lib/cuda
           name: libcuda
         {{ end }}
-        # {{ if eq $gpuType "amd" }}
+        # {{ if eq .Values.gpuType "amd" }}
         # - mountPath: /dev/dri
         #   name: dri
         # {{ end }}
         resources:
           requests: 
-{{ toYaml $requests | indent 12 }}
-            {{ if eq $gpuType "nvidia" }}
+{{ toYaml .Values.resources.requests | indent 12 }}
+            {{ if eq .Values.gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
           limits:
-            # cpu: {{ if $burst }}{{ max (mul 2 (atoi $cpu)) (atoi $maxCpu) | quote }}{{ else }}{{ $cpu }}{{ end }}
-            cpu: {{ if $burst }}{{  max (atoi $cpu) (atoi $maxCpu) }}{{ else }}{{ $cpu }}{{ end }}
-            memory: {{ $memory }}
-            {{ if eq $gpuType "nvidia" }}
+{{ toYaml .Values.resources.limits | indent 12 }}
+            {{ if eq .Values.gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
       restartPolicy: Never
       volumes:
-      - name: {{ $release }}-config
+      - name: {{ .Release.name }}-config
         configMap:
-          name: {{ $release }}-config
-      - name: {{ $storname }}
+          name: {{ .Release.name }}-config
+      - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
-          claimName: {{ $storname }}
-      {{ if eq $gpuType "nvidia" }}
+          claimName: {{ .Values.storage.name }}
+      {{ if eq .Values.gpuType "nvidia" }}
       - name: bin
         hostPath:
           path: /usr/lib/nvidia-384/bin
@@ -92,11 +73,8 @@ spec:
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
       {{ end }}
-      # {{ if eq $gpuType "amd" }}
+      # {{ if eq .Values.gpuType "amd" }}
       # - name: dri
       #   hostPath:
       #     path: /dev/dri
       # {{ end }}
----
-{{- end }}
-# {{- end }}

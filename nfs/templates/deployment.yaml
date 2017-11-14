@@ -22,6 +22,8 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          privileged: true
         volumeMounts:
         - name: exports
           mountPath: /exports

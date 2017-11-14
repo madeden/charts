@@ -10,13 +10,13 @@ parallelism: 1
 burst: true
 resources:
   requests:
-    cpu: "4"
+    cpu: 100m
     memory: 8Gi
-  max:
-    cpu: "16"
-
+  limit:
+    cpu: 100m
+    memory: 32Gi
 # Is this a GPU Benchmark? If true, inidicate the type of GPU nvidia or amd
-gpuType: false
+gpuType: cpu
 
 command: [ "/data/run_alpr.sh" ]
 
