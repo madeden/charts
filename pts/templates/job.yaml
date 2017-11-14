@@ -1,93 +1,86 @@
-{{- $type := .Values.type -}}
-{{- $parallelism := .Values.parallelism -}}
-{{- $cpu := .Values.resources.requests.cpu -}}
-{{- $memory := .Values.resources.requests.memory -}}
-{{- $maxCpu := .Values.resources.max.cpu -}}
+# Global
+{{- $release := .Release.Name -}}
+{{- $chartName := .Chart.Name -}}
+{{- $fullName := cat .Release.Name "-" .Chart.Name -}}
+
+# Resource Management
+{{- $manageResources := .Values.resources.manage -}}
 {{- $requests := .Values.resources.requests -}}
-{{- $burst := .Values.burst -}}
-{{- $release := .Release.name -}}
-{{- $benchmarkName := .benchmark.name -}}
-{{- $benchmarkType := .benchmark.type -}}
+{{- $limits := .Values.resources.limits -}}
+# Storage
+{{- $persistenceEnabled := .Values.persistence.enabled -}}
+{{- $hostPath := .Values.persistence.hostPath -}}
+{{- $existingClaim := .Values.persistence.existingClaim -}}
 
 ---
-# {{- range $index, $benchmark := .Values.benchmarks }}
-{{- range $job, $nb := until (int .Values.parallelism) }}
+{{- range .Values.benchmarks }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $type | lower }}-{{ $parallelism }}-{{ $cpu | lower }}-{{ $memory | lower }}-{{ $job }}
+  name: {{ $release }}-{{ .name | replace "/" "-" | lower }}
 spec:
-  parallelism: 1
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values: [ {{ $benchmarkName | quote }} ]
-        topologyKey: k8s.io/hostname
+  completions: {{ .completions }}
+  parallelism: {{ .parallelism }}
   template:
     metadata:
       labels:
-        app: {{ $benchmarkName | quote }}
+        app: {{ $release }}- {{- .name | replace "/" "-" | lower }}
     spec:
       containers:
-      - name: {{ $benchmark | replace "/" "-" | lower }}-{{ $job }}
-        image: samnco/pts:latest
-        {{ if eq $benchmarkType "suite" }}
-        args: [ "batch-run", "{{ $benchmarkName }}" ]
-        {{ else }}
-        args: [ "batch-run", "{{ $benchmark }}" ]
-        {{ end }}        
+      - name: {{ .name | replace "/" "-" | lower }}
+        image: {{ .image }}
+        command: [ "phoronix-test-suite", "batch-run", {{ .name | quote }}]
         env:
-        {{ if eq $gpuType "nvidia" }}
+        {{ if eq .gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         {{ end }}
-        # {{ if eq $gpuType "amd" }}
-        # - name: LD_LIBRARY_PATH
-        #   value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
-        # {{ end }}
         volumeMounts:
-          - mountPath: /var/lib/phoronix-test-suite
-            name: hostpath
-        - name: {{ $release }}-config
-          mountPath: /config
-        {{ if eq $gpuType "nvidia" }}
-        - mountPath: /usr/local/nvidia/bin
-          name: bin
-        - mountPath: /usr/lib/nvidia
-          name: lib
-        - mountPath: /usr/lib/cuda
-          name: libcuda
+        - name: pts
+          mountPath: /var/lib/phoronix-test-suite
+        - name: config
+          mountPath: /etc
+        {{ if eq .gpuType "nvidia" }}
+        - name: bin
+          mountPath: /usr/local/nvidia/bin
+        - name: lib
+          mountPath: /usr/lib/nvidia
+        - name: libcuda
+          mountPath: /usr/lib/cuda
         {{ end }}
-        # {{ if eq $gpuType "amd" }}
-        # - mountPath: /dev/dri
-        #   name: dri
-        # {{ end }}
+        {{ if $manageResources }}
         resources:
           requests: 
 {{ toYaml $requests | indent 12 }}
-            {{ if eq $gpuType "nvidia" }}
+            {{ if eq .gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
           limits:
-            # cpu: {{ if $burst }}{{ max (mul 2 (atoi $cpu)) (atoi $maxCpu) | quote }}{{ else }}{{ $cpu }}{{ end }}
-            cpu: {{ if $burst }}{{  max (atoi $cpu) (atoi $maxCpu) }}{{ else }}{{ $cpu }}{{ end }}
-            memory: {{ $memory }}
-            {{ if eq $gpuType "nvidia" }}
+{{ toYaml $limits | indent 12 }}
+            {{ if eq .gpuType "nvidia" }}
             alpha.kubernetes.io/nvidia-gpu: 1
             {{ end }}
+        {{ end }}
       restartPolicy: Never
       volumes:
-      - name: hostpath
-        hostPath:
-          path: /mnt
-      - name: {{ $release }}-config
+      - name: pts
+      {{ if and $persistenceEnabled (not $hostPath) }}
+        persistentVolumeClaim:
+          claimName: {{ $existingClaim | default $fullName | replace " " "" }}
+      {{ else if and $persistenceEnabled $hostPath }}
+        hostPath: 
+          path: {{ $hostPath }}
+          type: DirectoryOrCreate
+      {{ else }} 
+        emptyDir: {}
+      {{ end }}
+      - name: config
         configMap:
           name: {{ $release }}-config
-      {{ if eq $gpuType "nvidia" }}
+          items: 
+          - key: phoronix-test-suite.xml
+            path: phoronix-test-suite.xml
+      {{ if eq .gpuType "nvidia" }}
       - name: bin
         hostPath:
           path: /usr/lib/nvidia-384/bin
@@ -98,12 +91,5 @@ spec:
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
       {{ end }}
-      # {{ if eq $gpuType "amd" }}
-      # - name: dri
-      #   hostPath:
-      #     path: /dev/dri
-      # {{ end }}
-
 ---
 {{- end }}
-# {{- end }}
