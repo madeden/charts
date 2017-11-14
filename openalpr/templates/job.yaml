@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Values.type | lower }}-{{ .Values.parallelism }}-{{ .Values.resources.requests.cpu | lower }}-{{ .Values.resources.requests.memory | lower }}-{{ .Values.gpuType | lower }}
+  name: {{ template "fullname" . -}}-{{ .Values.type | lower }}-{{ .Values.parallelism }}-{{ .Values.resources.requests.cpu | lower }}-{{ .Values.resources.requests.memory | lower }}-{{ .Values.gpuType | lower }}
 spec:
   parallelism: 1
   template:
@@ -11,13 +11,12 @@ spec:
     spec:
       containers:
       - name: openalpr
-        image: {{- .Values.image -}}:{{- if eq .Values.gpuType "nvidia" -}}latest-3.3.1-16.04-cuda-2{{- else -}}latest-3.3.1-16.04-nocuda{{- end -}}
+        
+        image: {{ .Values.image -}}:{{- if eq .Values.gpuType "nvidia" }}latest-3.3.1-16.04-cuda-2{{- else }}latest-3.3.1-16.04-nocuda{{- end }}
         command: {{ .Values.command }}
         env:
         - name: JOB_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: {{ .Values.type | lower }}-{{ .Values.parallelism }}-{{ .Values.resources.requests.cpu | lower }}-{{ .Values.resources.requests.memory | lower }}-{{ .Values.gpuType | lower }}
+          value: {{ template "fullname" . -}}-{{ .Values.type | lower }}-{{ .Values.parallelism }}-{{ .Values.resources.requests.cpu | lower }}-{{ .Values.resources.requests.memory | lower }}-{{ .Values.gpuType | lower }}
        {{ if eq .Values.gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
@@ -27,7 +26,7 @@ spec:
         #   value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
         # {{ end }}
         volumeMounts:
-        - name: {{ .Release.name }}-config
+        - name: config
           mountPath: /etc/openalpr
         - name: {{ .Values.storage.name }}
           mountPath: /data
@@ -56,9 +55,9 @@ spec:
             {{ end }}
       restartPolicy: Never
       volumes:
-      - name: {{ .Release.name }}-config
+      - name: config
         configMap:
-          name: {{ .Release.name }}-config
+          name: {{ template "fullname" . }}-config
       - name: {{ .Values.storage.name }}
         persistentVolumeClaim:
           claimName: {{ .Values.storage.name }}
