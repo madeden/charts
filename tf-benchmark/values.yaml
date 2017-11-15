@@ -1,0 +1,24 @@
+# How many times do we run each benchmark AT THE SAME TIME. 
+# Note that if this number exceeds the total number of GPUs and 
+# the test is set to gpu mode, then some pods will not be scheduled
+parallelism: 1
+
+# Provide indications on resource quotas. Helps understand the profile of the app 
+resources:
+  manage: false
+  requests:
+    cpu: 100m
+    memory: 8Gi
+  limit:
+    cpu: 100m
+    memory: 32Gi
+
+# Change this if you have several scripts
+command: [ "/data/run-tf-bench.sh" ]
+
+
+# select between real-data and synthetic 
+mode: synthetic
+
+# storage path
+hostPath: /tf-data

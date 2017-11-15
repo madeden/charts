@@ -1,32 +1,27 @@
-# Type is a simple test differenciator
+# Separator name
 type: ktrn
 
-# How many times do we run each benchmark AT THE SAME TIME. 
-# Note that if this number exceeds the total number of GPUs and 
-# the test is set to gpu mode, then some pods will not be scheduled
+image: samnco:openalpr
+
+# How many times do we run each benchmark
 parallelism: 1
 
-# Provide indications on resource quotas. Helps understand the profile of the app 
+# Do we want to burst. If yes, resource limit will double request. 
+burst: false
 resources:
   requests:
-    cpu: 100m
+    cpu: "4"
     memory: 8Gi
-  limit:
-    cpu: 100m
-    memory: 32Gi
+  max:
+    cpu: "4"
+    memory: 8Gi
 
-# Is this a GPU Benchmark? If true, inidicate the type of GPU nvidia or amd. Otherwise set to anything
-gpuType: cpu
 
-# Change this if you have several scripts
-command: [ "/data/run-alpr.sh" ]
+# Is this a GPU Benchmark? If true, inidicate the type of GPU nvidia or amd
+gpuType: nvidia
 
-# Where to load storage from
-storage:
-  name: nfs-nfs
+imageFolder: /openalpr-data
 
-# If run in GPU mode, you must also change the library in the config file. 
-# You can also change settings to understand the profile. 
 openalprConfig: |-
   runtime_dir = ${CMAKE_INSTALL_PREFIX}/share/openalpr/runtime_data
   ocr_img_size_percent = 1.33333333
@@ -42,7 +37,7 @@ openalprConfig: |-
   ; lbpgpu    - LBP-based detector that uses Nvidia GPU to increase recognition speed.
   ; lbpopencl - LBP-based detector that uses OpenCL GPU to increase recognition speed.  Requires OpenCV 3.0
   ; morphcpu  - Experimental detector that detects white rectangles in an image.  Does not require training.
-  detector = lbpcpu
+  detector = lbpgpu
   must_match_pattern = 0
   skip_detection = 0
   detection_mask_image = 
@@ -66,3 +61,7 @@ openalprConfig: |-
   debug_postprocess     = 0
   debug_show_images     = 0
   debug_pause_on_frame  = 0
+
+
+
+
