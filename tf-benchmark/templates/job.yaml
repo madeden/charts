@@ -28,8 +28,8 @@ spec:
           name: lib
         - mountPath: /usr/lib/cuda
           name: libcuda
-        {{ if .Values.resources.manage }}
         resources:
+        {{ if .Values.resources.manage }}
           requests: 
 {{ toYaml .Values.resources.requests | indent 12 }}
             alpha.kubernetes.io/nvidia-gpu: 1

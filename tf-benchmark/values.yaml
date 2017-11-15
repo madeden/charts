@@ -22,3 +22,6 @@ mode: synthetic
 
 # storage path
 hostPath: /tf-data
+
+# Where is this going to run
+nodeSelector: {}
