@@ -16,7 +16,7 @@ spec:
         command: {{ .Values.command }}
         env:
         - name: MODE
-          value: {{ .Values.node }} 
+          value: {{ .Values.mode }} 
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
         volumeMounts:
