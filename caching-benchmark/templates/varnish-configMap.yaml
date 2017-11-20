@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-varnish
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: {{ template "fullname" . }}-varnish
+    heritage: {{.Release.Service | quote }}
+    chart: {{.Chart.Name}}-{{.Chart.Version}}
+    release: {{ .Release.Name | quote }}
+data:
+  default.vcl: |-
+{{ .Values.varnish.config | indent 4 }}
+  secret: |-
+    foobar
+

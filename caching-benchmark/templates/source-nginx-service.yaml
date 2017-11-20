@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: benchmark-source-nginx
+  labels:
+    app: {{ template "name" . }}-source-nginx
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - port: 443
+      targetPort: 443
+      protocol: TCP
+      name: https
+  selector:
+    app: {{ template "name" . }}-source-nginx
+    release: {{ .Release.Name }}

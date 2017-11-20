@@ -1,0 +1,57 @@
+
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-cache-nginx
+  labels:
+    app: {{ template "name" . }}-cache-nginx
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.cacheNginx.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}-cache-nginx
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: nginx
+        image: "{{ .Values.cacheNginx.image }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: cache
+          mountPath: /tmp/cache_all
+        - name: config
+          mountPath: /etc/nginx
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        readinessProbe:
+          tcpSocket: 
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+{{ toYaml .Values.cacheNginx.resources | indent 10}}
+    {{- if .Values.cacheNginx.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.cacheNginx.nodeSelector | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: cache
+        emptyDir: {}
+      - name: config
+        configMap:
+        # Provide the name of the ConfigMap containing the files you want
+        # to add to the container
+          name: {{ template "fullname" . }}-cache-nginx

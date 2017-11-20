@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-varnish
+  labels:
+    app: {{ template "name" . }}-varnish
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.varnish.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}-varnish
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.varnish.image }}
+        imagePullPolicy: IfNotPresent
+        command: [ '/usr/sbin/varnishd', '-F', '-f', '/etc/varnish/default.vcl', '-s', 'malloc,{{ .Values.varnish.memory }}', '-a', '0.0.0.0:80', '-a', '0.0.0.0:81,PROXY']
+        volumeMounts:
+        - name: config
+          mountPath: /etc/varnish
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 80
+          name: proxy
+        - containerPort: 443
+          name: https
+        readinessProbe:
+          tcpSocket: 
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: config
+        configMap:
+        # Provide the name of the ConfigMap containing the files you want
+        # to add to the container
+          name: {{ template "fullname" . }}-varnish

@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-source-nginx
+  labels:
+    app: {{ template "name" . }}v
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.sourceNginx.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}-source-nginx
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: nginx
+        image: "{{ .Values.sourceNginx.image }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: src
+          mountPath: /usr/share/nginx/html
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        readinessProbe:
+          tcpSocket: 
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+{{ toYaml .Values.sourceNginx.resources | indent 10}}
+    {{- if .Values.sourceNginx.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.sourceNginx.nodeSelector | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: src
+        hostPath: 
+          path: {{ .Values.sourceNginx.hostPath }}

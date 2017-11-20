@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Simple setup with web server and 2 frontends to benchmark perf in k8s
+name: caching-benchmark
+version: 0.1.0
