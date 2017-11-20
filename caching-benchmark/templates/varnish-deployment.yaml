@@ -19,7 +19,8 @@ spec:
       - name: {{ .Chart.Name }}
         image: {{ .Values.varnish.image }}
         imagePullPolicy: IfNotPresent
-        command: [ '/usr/sbin/varnishd', '-F', '-f', '/etc/varnish/default.vcl', '-s', 'malloc,{{ .Values.varnish.memory }}', '-a', '0.0.0.0:80', '-a', '0.0.0.0:81,PROXY']
+        command: [ "/usr/sbin/varnishd" ]
+        args: [ "-F", "-f", "/etc/varnish/default.vcl", "-s", "malloc,{{ .Values.varnish.memory }}", "-a", "0.0.0.0:80", "-a", "0.0.0.0:81,PROXY"]
         volumeMounts:
         - name: config
           mountPath: /etc/varnish
@@ -41,10 +42,10 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 20
         resources:
-{{ toYaml .Values.resources | indent 10 }}
-    {{- if .Values.nodeSelector }}
+{{ toYaml .Values.varnish.resources | indent 10 }}
+    {{- if .Values.varnish.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+{{ toYaml .Values.varnish.nodeSelector | indent 8 }}
     {{- end }}
       volumes:
       - name: config

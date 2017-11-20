@@ -1,0 +1,53 @@
+{{- $release := .Release.Name -}}
+{{- $releaseNamespace := .Release.Namespace -}}
+{{- $releaseService := .Release.Service -}}
+{{- $chart := .Chart.Name -}}
+{{- $chartVersion := .Chart.Version -}}
+{{- $replicas := (int .Values.wrk.replicaCount) -}}
+{{- $image := .Values.wrk.image -}}
+
+{{- $timeout := .Values.wrk.timeout -}}
+{{- $concurrency := .Values.wrk.concurrency -}}
+{{- $duration := .Values.wrk.duration -}}
+{{- $threads := .Values.wrk.threads -}}
+{{- $target := .Values.wrk.target -}}
+
+{{- $resources := .Values.wrk.resources -}}
+{{- $nodeSelector := .Values.wrk.nodeSelector -}}
+
+---
+{{ range $worker, $nbw := until $replicas }}
+# Definiting a scalable cluster
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $release }}-wrk
+  namespace: {{ $releaseNamespace }}
+  labels:
+    app: {{ $release }}-{{ $chart }}-wrk
+    chart: {{ $chart }}-{{ $chartVersion | replace "+" "_" }}
+    release: {{ $release }}
+    heritage: {{ $releaseService }}
+spec:
+  parallelism: {{ $replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ $release }}-{{ $chart }}-wrk
+        release: {{ $release }}
+    spec:
+      containers:
+      - name: wrk
+        image: {{ $image }}
+        command: [ "wrk" ]
+        args: [ "--timeout {{ $timeout }} -c {{ $concurrency }} -d {{ $duration }} -t {{ $threads }} http://{{ $release -}}-{{- $chart -}}-{{- $target }}" ]
+        resources:
+{{ toYaml $resources | indent 10 }}
+      {{- if $nodeSelector }}
+      nodeSelector:
+{{ toYaml $nodeSelector | indent 8 }}
+      {{- end }}
+
+---
+{{ end }}
+
