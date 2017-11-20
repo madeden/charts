@@ -40,7 +40,7 @@ spec:
       containers:
       - name: wrk
         image: {{ $image }}
-        command: [ "wrk" ]
+        command: [ "/usr/local/bin/wrk" ]
         args: [ "--timeout {{ $timeout }} -c {{ $concurrency }} -d {{ $duration }} -t {{ $threads }} http://{{ $release -}}-{{- $chart -}}-{{- $target }}" ]
         resources:
 {{ toYaml $resources | indent 10 }}
