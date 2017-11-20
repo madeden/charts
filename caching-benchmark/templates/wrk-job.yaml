@@ -36,6 +36,7 @@ spec:
         app: {{ $release }}-{{ $chart }}-wrk
         release: {{ $release }}
     spec:
+      restartPolicy: Never
       containers:
       - name: wrk
         image: {{ $image }}
