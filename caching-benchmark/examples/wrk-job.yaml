@@ -11,6 +11,7 @@
 {{- $duration := .Values.wrk.duration -}}
 {{- $threads := .Values.wrk.threads -}}
 {{- $target := .Values.wrk.target -}}
+{{- $file := .Values.wrk.file -}}
 
 {{- $resources := .Values.wrk.resources -}}
 {{- $nodeSelector := .Values.wrk.nodeSelector -}}
@@ -40,8 +41,8 @@ spec:
       containers:
       - name: wrk
         image: {{ $image }}
-        command: [ "/usr/local/bin/wrk" ]
-        args: [ "--timeout {{ $timeout }} -c {{ $concurrency }} -d {{ $duration }} -t {{ $threads }} http://{{ $release -}}-{{- $chart -}}-{{- $target }}" ]
+        # command: [ "/usr/local/bin/wrk" ]
+        args: [ "-c", "{{ $concurrency }}", "--latency",  "--timeout", "{{ $timeout }}", "-d", "{{ $duration }}", "-t", "{{ $threads }}", "http://{{ $release -}}-{{- $chart -}}-{{- $target }}.default.svc.cluster.local/{{ $file }}" ]
         resources:
 {{ toYaml $resources | indent 10 }}
       {{- if $nodeSelector }}
