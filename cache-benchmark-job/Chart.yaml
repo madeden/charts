@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Just building job to benchmark nginx & varnish
+name: cache-benchmark-job
+version: 0.1.0

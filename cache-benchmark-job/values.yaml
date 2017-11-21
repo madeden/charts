@@ -1,0 +1,22 @@
+###
+#
+# Serving Container (nginx)
+#
+###
+wrk: 
+  replicaCount: 1
+  image: williamyeh/wrk
+  resources: 
+    requests:
+      cpu: 1000m
+      memory: 2048Mi
+    limits:
+      cpu: 16000m
+      memory: 16384Mi
+  nodeSelector: {}
+  timeout: 2s
+  concurrency: 1000
+  duration: 30s
+  threads: 100
+  # pick nginx or varnish
+  target: nginx
