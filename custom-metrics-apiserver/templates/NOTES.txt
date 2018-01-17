@@ -1,0 +1,5 @@
+This chart is an application of the Custom Metrics API as documented in https://github.com/DirectXMan12/k8s-prometheus-adapter
+
+It requires a prometheus installation to be active and running at http://{{- .Values.prometheus.service.name -}}.{{- .Values.prometheus.namespace -}}.svc:{{- .Values.prometheus.service.port -}}/
+
+It will then create a custom-metrics API server in order to permit the creation of HPAs based on custom metrics, such as number of hits on an API. 

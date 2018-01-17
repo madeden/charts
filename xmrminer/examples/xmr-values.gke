@@ -10,8 +10,8 @@ moneroCluster:
     dockerTag: 1.5.0
   settings:
     clusterName: cpu
-    nodes: 3
-    workersPerNode: 2
+    nodes: 2
+    workersPerNode: 1
     cpusPerWorker: 1
     gpuType: cpu
     nodeSelector: "*"

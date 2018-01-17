@@ -1,0 +1,15 @@
+{{- if .Values.rbac.install -}}
+apiVersion: rbac.authorization.k8s.io/{{- .Values.rbac.apiVersion }}
+kind: RoleBinding
+metadata:
+  name: custom-metrics-auth-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ template "custom-metrics-apiserver.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end -}}

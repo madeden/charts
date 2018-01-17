@@ -1,0 +1,13 @@
+apiVersion: apiregistration.k8s.io/{{- .Values.service.version }}
+kind: APIService
+metadata:
+  name: {{ .Values.service.version -}}.custom.metrics.k8s.io
+spec:
+  service:
+    name: {{ template "custom-metrics-apiserver.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  group: custom.metrics.k8s.io
+  version: {{ .Values.service.version }}
+  insecureSkipTLSVerify: {{ if .Values.service.tls.insecureSkipTLSVerify }}true{{ else }}false{{ end }}
+  groupPriorityMinimum: 100
+  versionPriority: 100

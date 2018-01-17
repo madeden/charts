@@ -1,0 +1,14 @@
+{{- if .Values.rbac.install -}}
+apiVersion: rbac.authorization.k8s.io/{{- .Values.rbac.apiVersion }}
+kind: ClusterRoleBinding
+metadata:
+  name: hpa-controller-custom-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: custom-metrics-server-resources
+subjects:
+- kind: ServiceAccount
+  name: horizontal-pod-autoscaler
+  namespace: kube-system
+{{- end -}}

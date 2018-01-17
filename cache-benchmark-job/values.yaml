@@ -20,3 +20,4 @@ wrk:
   threads: 100
   # pick nginx or varnish
   target: nginx
+  file: 12b

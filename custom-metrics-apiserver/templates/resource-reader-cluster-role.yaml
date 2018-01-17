@@ -1,0 +1,16 @@
+{{- if .Values.rbac.install -}}
+apiVersion: rbac.authorization.k8s.io/{{- .Values.rbac.apiVersion }}
+kind: ClusterRole
+metadata:
+  name: custom-metrics-resource-reader
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - pods
+  - services
+  verbs:
+  - get
+  - list
+{{- end -}}

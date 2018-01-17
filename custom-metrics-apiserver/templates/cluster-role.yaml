@@ -1,0 +1,11 @@
+{{- if .Values.rbac.install -}}
+apiVersion: rbac.authorization.k8s.io/{{- .Values.rbac.apiVersion }}
+kind: ClusterRole
+metadata:
+  name: custom-metrics-server-resources
+rules:
+- apiGroups:
+  - custom.metrics.k8s.io
+  resources: ["*"]
+  verbs: ["*"]
+{{- end -}}

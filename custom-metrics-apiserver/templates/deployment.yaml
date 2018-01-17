@@ -1,0 +1,54 @@
+apiVersion: extensions/{{- .Values.service.version }}
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "custom-metrics-apiserver.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  name: {{ template "custom-metrics-apiserver.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "custom-metrics-apiserver.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "custom-metrics-apiserver.fullname" . }}
+      name: {{ template "custom-metrics-apiserver.fullname" . }}
+    spec:
+      {{ if .Values.rbac.install -}}
+      serviceAccountName: {{ template "custom-metrics-apiserver.fullname" . }}
+      {{- end }}
+      containers:
+      - name: {{ template "custom-metrics-apiserver.fullname" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - /adapter
+        {{ if .Values.service.tls.enable -}}
+        - --secure-port={{ .Values.service.internalPort }}
+        - --tls-cert-file=/var/run/serving-cert/tls.crt
+        - --tls-private-key-file=/var/run/serving-cert/tls.key
+        {{- end }}
+        - --logtostderr=true
+        - --prometheus-url=http://{{- .Values.prometheus.service.name -}}.{{- .Values.prometheus.namespace -}}.svc:{{- .Values.prometheus.service.port -}}/
+        - --metrics-relist-interval=30s
+        - --rate-interval=5m
+        - --v=10
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        {{ if .Values.service.tls.enable -}}
+        volumeMounts:
+        - mountPath: /var/run/serving-cert
+          name: volume-serving-cert
+          readOnly: true
+      volumes:
+      - name: volume-serving-cert
+        secret:
+          secretName: {{ template "custom-metrics-apiserver.certname" . }}
+        {{- end }}
