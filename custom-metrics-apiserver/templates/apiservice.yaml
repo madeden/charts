@@ -4,10 +4,13 @@ metadata:
   name: {{ .Values.service.version -}}.custom.metrics.k8s.io
 spec:
   service:
-    name: {{ template "custom-metrics-apiserver.fullname" . }}
+    name: {{ .Values.service.name }}
     namespace: {{ .Release.Namespace }}
+  {{ if .Values.service.tls.enable -}}
+  caBundle: {{ b64enc .Values.service.tls.ca }}
+  {{- end }} 
   group: custom.metrics.k8s.io
   version: {{ .Values.service.version }}
-  insecureSkipTLSVerify: {{ if .Values.service.tls.insecureSkipTLSVerify }}true{{ else }}false{{ end }}
+  insecureSkipTLSVerify: {{ if .Values.service.tls.enable }}false{{ else }}true{{ end }}
   groupPriorityMinimum: 100
   versionPriority: 100

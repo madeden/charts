@@ -27,7 +27,6 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
-        - /adapter
         {{ if .Values.service.tls.enable -}}
         - --secure-port={{ .Values.service.internalPort }}
         - --tls-cert-file=/var/run/serving-cert/tls.crt
