@@ -15,6 +15,7 @@
 {{- $gpuType := .Values.moneroCluster.settings.gpuType -}}
 {{- $nodeSelector := .Values.moneroCluster.settings.nodeSelector -}}
 {{- $coin := .Values.moneroCluster.settings.coin -}}
+{{- $nvVersion := .Values.moneroCluster.settings.nvVersion -}}
 
 ---
 {{ range $node, $nbn := until $nodes }}
@@ -105,10 +106,10 @@ spec:
       {{ if eq $gpuType "nvidia" }}
       - name: bin
         hostPath:
-          path: /usr/lib/nvidia-384/bin
+          path: /usr/lib/nvidia-{{ $nvVersion }}/bin
       - name: lib
         hostPath:
-          path: /usr/lib/nvidia-384
+          path: /usr/lib/nvidia-{{ $nvVersion }}
       - name: libcuda
         hostPath:
           path: /usr/lib/x86_64-linux-gnu

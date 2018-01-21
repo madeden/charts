@@ -1,0 +1,4 @@
+apiVersion: v1
+description: This chart deploys a Sample Application to demo the HPA on a custom metric
+name: hpa-demo-app
+version: 0.1.0

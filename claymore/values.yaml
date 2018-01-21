@@ -10,10 +10,11 @@ claymoreCluster:
   image: 
     repo: samnco
     name: claymore-miner
-    dockerTag: 9.7
+    dockerTag: 10.0
   settings:
     nodeSelector: GeForce-GTX-1060-6GB
     gpuType: nvidia
+    nvVersion: 387 
     nodes: "3"
     nbGpuPerNode: "1"
    # nbGpuPerWorker: 1

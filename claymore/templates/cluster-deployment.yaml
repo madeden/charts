@@ -21,6 +21,7 @@
 {{- $resources := .Values.claymoreCluster.resources -}}
 {{- $nodeSelector := .Values.claymoreCluster.settings.nodeSelector -}}
 {{- $gpuType := .Values.claymoreCluster.settings.gpuType -}}
+{{- $nvVersion := .Values.claymoreCluster.settings.nvVersion -}}
 
 ---
 # Defining a generic configuration file for the cluster
@@ -164,10 +165,10 @@ spec:
       {{ if eq $gpuType "nvidia" }}
       - name: bin
         hostPath:
-          path: /usr/lib/nvidia-384/bin
+          path: /usr/lib/nvidia-{{ $nvVersion }}/bin
       - name: lib
         hostPath:
-          path: /usr/lib/nvidia-384
+          path: /usr/lib/nvidia-{{ $nvVersion }}
       - name: libcuda
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
@@ -179,7 +180,7 @@ spec:
       {{ end }}
       {{ if ne $nodeSelector "*" }}
       nodeSelector: 
-        kubernetes.io/gpu-name: {{ $nodeSelector }}
+        kubernetes.io/gpu-name: {{ $nodeSelector }}§
       {{ end }}
 ---
 {{ end }}

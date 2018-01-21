@@ -1,0 +1,41 @@
+apiVersion: apps/{{ .Values.service.appsApiVersion }}
+kind: Deployment
+metadata: 
+  name: {{ template "hpa-demo-app.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "hpa-demo-app.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  {{- if contains .Values.service.appsApiVersion "v2" }}
+  selector:
+    matchLabels:
+      app: {{ template "hpa-demo-app.name" . }}
+      release: {{ .Release.Name }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "hpa-demo-app.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.internalPort }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.service.internalPort }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.service.internalPort }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}

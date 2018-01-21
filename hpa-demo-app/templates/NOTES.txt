@@ -1,0 +1,33 @@
+This chart deploys a sample application to test the AutoScaling feature on a K8s 1.8+ cluster. 
+
+1. Get the application URL by running these commands:
+{{- if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "hpa-demo-app.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get svc -w {{ template "hpa-demo-app.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "hpa-demo-app.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:{{ .Values.service.externalPort }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ template "hpa-demo-app.name" . }},release={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl port-forward $POD_NAME 8080:{{ .Values.service.internalPort }}
+{{- end }}
+
+You can then watch the Horizontal Pod Autoscaler via 
+
+  kubectl get hpa -n {{ .Release.Namespace }} -w 
+
+Then load the application by using a tool such as wrk 
+
+  docker pull williamyeh/wrk
+  docker run --rm -it williamyeh/wrk \
+    --concurrency 10 \
+    --latency --timeout 2s \
+    --duration 60s \
+    --threads 5 \
+    < URL discovered above > 
+
+you should see the load go up, which will trigger the scaling of the application. 

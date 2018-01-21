@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "hpa-demo-app.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- range $key, $value := .Values.serviceMonitor.labels }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end}}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "hpa-demo-app.name" . }}
+      release: {{ .Release.Name }}
+  endpoints:
+  - port: http

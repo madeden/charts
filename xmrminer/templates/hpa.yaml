@@ -1,0 +1,19 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/{{ .Values.hpa.apiVersion }}
+metadata:
+  name: {{ template "hpa-demo-app.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: {{ template "hpa-demo-app.fullname" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+  - type: Object
+    object:
+      target:
+        kind: Service
+        name: {{ template "hpa-demo-app.fullname" . }}
+      metricName: {{ .Values.hpa.metricName }}
+      targetValue: {{ .Values.hpa.targetValue }}
