@@ -9,13 +9,18 @@ moneroCluster:
     name: xmrminer
     dockerTag: 0.1.4
   settings:
-    clusterName: ob
-    nodes: 3
-    workersPerNode: 1
-    cpusPerWorker: 5
+    replicaCount: 150
     gpuType: nvidia
     nvVersion: 387
     nodeSelector: GeForce-GTX-1060-6GB
+  resources:
+    # Only add CPU and Memory in here, nvidia GPUs are part of the model already. 
+    requests: 
+      cpu: 1000m
+      memory: 1024Mi
+    limits:
+      cpu: 2000m
+      memory: 2048Mi      
   configMap: |-
     "pool_list" : [ { 
       "pool_address" : "pool.supportxmr.com:5555",

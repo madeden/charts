@@ -1,128 +1,94 @@
-{{- $release := .Release.Name -}}
-{{- $releaseNamespace := .Release.Namespace -}}
-{{- $releaseService := .Release.Service -}}
-{{- $chart := .Chart.Name -}}
-{{- $chartVersion := .Chart.Version -}}
-{{- $repo := .Values.moneroCluster.image.repo -}}
-{{- $image := .Values.moneroCluster.image.name -}}
-{{- $tag := .Values.moneroCluster.image.dockerTag -}}
-{{- $clusterName := .Values.moneroCluster.settings.clusterName | trunc 24 -}}
-{{- $name := .Values.moneroCluster.service.name | trunc 24 -}}
-{{- $gpu := .Values.moneroCluster.settings.gpu -}}
-{{- $nodes := (int .Values.moneroCluster.settings.nodes) -}}
-{{- $workersPerNode := (int .Values.moneroCluster.settings.workersPerNode) -}}
-{{- $cpusPerWorker := ( int .Values.moneroCluster.settings.cpusPerWorker) -}}
-{{- $gpuType := .Values.moneroCluster.settings.gpuType -}}
-{{- $nodeSelector := .Values.moneroCluster.settings.nodeSelector -}}
-{{- $coin := .Values.moneroCluster.settings.coin -}}
-{{- $nvVersion := .Values.moneroCluster.settings.nvVersion -}}
-
----
-{{ range $node, $nbn := until $nodes }}
-{{ range $worker, $nbw := until $workersPerNode }}
-# Definiting a scalable cluster
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: worker-{{ $clusterName }}-{{ $node }}-{{ $worker }}
-  namespace: {{ $releaseNamespace }}
+  name: {{ template "xmrminer.fullname" . }}
+  namespace: {{ .Release.namespace }}
   labels:
-    app: {{ $name }}
-    cluster: {{ $clusterName }}
-    heritage: {{ $releaseService }}
-    chart: {{ $chart }}-{{ $chartVersion }}
-    release: {{ $release }}
+    app: {{ template "xmrminer.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.moneroCluster.settings.replicaCount }}
   selector:
     matchLabels:
-      cluster: {{ $clusterName }}
-      node: {{ $node | quote }}
-      worker: {{ $worker | quote }}
-      app: {{ $name }}
-      heritage: {{ $releaseService }}
-      chart: {{ $chart }}-{{ $chartVersion }}
-      release: {{ $release }}
+      app: {{ template "xmrminer.name" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
   template:
     metadata:
       labels:
-        cluster: {{ $clusterName }}
-        node: {{ $node | quote }}
-        worker: {{ $worker | quote }}
-        app: {{ $name }}
-        heritage: {{ $releaseService }}
-        chart: {{ $chart }}-{{ $chartVersion }}
-        release: {{ $release }}
+        app: {{ template "xmrminer.name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
     spec:
       containers:
-      - name: xmr-miner-{{ $clusterName }}
-        image: {{ $repo }}/{{ $image }}:{{ $tag }}-{{ $gpuType }}
+      - name: xmrminer
+        image: {{ .Values.moneroCluster.image.repo }}/{{ .Values.moneroCluster.image.name }}:{{ .Values.moneroCluster.image.dockerTag }}-{{ .Values.moneroCluster.settings.gpuType }}
         command: [ "/usr/local/bin/xmr-stak-sigint" ]
-        {{ if eq $gpuType "amd" }}
+        {{ if eq .Values.moneroCluster.settings.gpuType "amd" -}}
         securityContext:
           privileged: true
-        {{ end }}
-        resources:
-          requests:
-            cpu: {{ $cpusPerWorker }}000m
-            memory: 1024Mi
-            {{ if eq $gpuType "nvidia" }}
-            alpha.kubernetes.io/nvidia-gpu: 1
-            {{ end }}
-          limits:
-            cpu: {{ mul 2 $cpusPerWorker }}000m
-            memory: 1024Mi
-            {{ if eq $gpuType "nvidia" }}
-            alpha.kubernetes.io/nvidia-gpu: 1
-            {{ end }}
+        {{- end }}
         env:
-        {{ if eq $gpuType "nvidia" }}
+        {{- if eq .Values.moneroCluster.settings.gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"
-        {{ end }}
-        {{ if eq $gpuType "amd" }}
+        {{- end }}
+        {{- if eq .Values.moneroCluster.settings.gpuType "amd" -}}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
-        {{ end }}
+        {{- end }}
         volumeMounts:
-        - name: {{ $release }}-config
+        - name: {{ .Release.Name }}-config
           mountPath: /config
-        {{ if eq $gpuType "nvidia" }}
+        {{ if eq .Values.moneroCluster.settings.gpuType "nvidia" -}}
         - mountPath: /usr/local/nvidia/bin
           name: bin
         - mountPath: /usr/lib/nvidia
           name: lib
         - mountPath: /usr/lib/cuda
           name: libcuda
-        {{ end }}
-        {{ if eq $gpuType "amd" }}
+        {{- end }}
+        {{- if eq .Values.moneroCluster.settings.gpuType "amd" -}}
         - mountPath: /dev/dri
           name: dri
-        {{ end }}
+        {{- end }}
+        resources:
+          requests:
+{{ toYaml .Values.moneroCluster.resources.requests | indent 12 }}
+            {{- if eq .Values.moneroCluster.settings.gpuType "nvidia" -}}
+            alpha.kubernetes.io/nvidia-gpu: 1
+            {{- end }}
+          limits:
+{{ toYaml .Values.moneroCluster.resources.limits | indent 12 }}
+            {{- if eq .Values.moneroCluster.settings.gpuType "nvidia" -}}
+            alpha.kubernetes.io/nvidia-gpu: 1
+            {{- end }}
       volumes:
-      - name: {{ $release }}-config
+      - name: {{ .Release.Name -}}-config
         configMap:
-          name: {{ $release }}-config
-      {{ if eq $gpuType "nvidia" }}
+          name: {{ .Release.Name -}}-config
+      {{ if eq .Values.moneroCluster.settings.gpuType "nvidia" -}}
       - name: bin
         hostPath:
-          path: /usr/lib/nvidia-{{ $nvVersion }}/bin
+          path: /usr/lib/nvidia-{{- .Values.moneroCluster.settings.nvVersion -}}/bin
       - name: lib
         hostPath:
-          path: /usr/lib/nvidia-{{ $nvVersion }}
+          path: /usr/lib/nvidia-{{- .Values.moneroCluster.settings.nvVersion }}
       - name: libcuda
         hostPath:
           path: /usr/lib/x86_64-linux-gnu
-      {{ end }}
-      {{ if eq $gpuType "amd" }}
+      {{- end }}
+      {{ if eq .Values.moneroCluster.settings.gpuType "amd" -}}
       - name: dri
         hostPath:
           path: /dev/dri
-      {{ end }}
-      {{ if ne $nodeSelector "*" }}
+      {{- end }}
+      {{ if ne .Values.moneroCluster.settings.nodeSelector "*" -}}
       nodeSelector: 
-        kubernetes.io/gpu-name: {{ $nodeSelector }}
-      {{ end }}
----
-{{ end }}
-{{ end }}
+        kubernetes.io/gpu-name: {{ .Values.moneroCluster.settings.nodeSelector }}
+      {{- end }}
+
