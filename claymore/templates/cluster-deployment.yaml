@@ -180,7 +180,7 @@ spec:
       {{ end }}
       {{ if ne $nodeSelector "*" }}
       nodeSelector: 
-        kubernetes.io/gpu-name: {{ $nodeSelector }}§
+        kubernetes.io/gpu-name: {{ $nodeSelector }}
       {{ end }}
 ---
 {{ end }}
