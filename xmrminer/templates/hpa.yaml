@@ -1,3 +1,4 @@
+{{- if .Values.hpa.enable -}}
 kind: HorizontalPodAutoscaler
 apiVersion: autoscaling/{{ .Values.hpa.apiVersion }}
 metadata:
@@ -17,3 +18,4 @@ spec:
         name: {{ template "hpa-demo-app.fullname" . }}
       metricName: {{ .Values.hpa.metricName }}
       targetValue: {{ .Values.hpa.targetValue }}
+{{- end -}}
