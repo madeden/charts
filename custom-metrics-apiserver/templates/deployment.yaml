@@ -32,6 +32,9 @@ spec:
         - --tls-cert-file=/var/run/serving-cert/tls.crt
         - --tls-private-key-file=/var/run/serving-cert/tls.key
         {{- end }}
+        {{ if eq .Values.service.authentication.method "kubeconfig" -}}
+        - --authentication-kubeconfig=/var/run/kubeconfig/kubeconfig
+        {{- end }}
         - --logtostderr=true
         - --prometheus-url=http://{{- .Values.prometheus.service.name -}}.{{- .Values.prometheus.namespace -}}.svc:{{- .Values.prometheus.service.port -}}/
         - --metrics-relist-interval=30s
@@ -41,13 +44,25 @@ spec:
         - containerPort: {{ .Values.service.internalPort }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
-        {{ if .Values.service.tls.enable -}}
         volumeMounts:
+        {{ if .Values.service.tls.enable -}}
         - mountPath: /var/run/serving-cert
           name: volume-serving-cert
           readOnly: true
+        {{- end }}
+        {{ if eq .Values.service.authentication.method "kubeconfig" -}}
+        - mountPath: /var/run/kubeconfig
+          name: kubeconfig
+          readOnly: true
+        {{- end }}
       volumes:
+      {{ if .Values.service.tls.enable -}}
       - name: volume-serving-cert
         secret:
           secretName: {{ template "custom-metrics-apiserver.certname" . }}
-        {{- end }}
+      {{- end }}
+      {{ if eq .Values.service.authentication.method "kubeconfig" -}}
+      - name: kubeconfig
+        secret:
+          secretName: {{ template "custom-metrics-apiserver.kubeconfig" . }}
+      {{- end }}

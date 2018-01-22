@@ -21,6 +21,33 @@ service:
       # Put here the certificate of the Serving API Adapter
   # Current version of the custom-metrics API for K8s 
   version: v1beta1
+  authentication:
+    # method to use to load configuration. By default, will use tokens. 
+    # Acceptable options: default, kubeconfig 
+    method: kubeconfig
+    kubeconfig: |-
+      apiVersion: v1
+      clusters:
+      - cluster:
+          certificate-authority-data: base64 certificate
+          server: https://api-server:443
+        name: cluster
+      contexts:
+      - context:
+          cluster: cluster
+          user: admin
+        name: context
+      current-context: context
+      kind: Config
+      preferences: {}
+      users:
+      - name: admin
+        user:
+          as-user-extra: {}
+          password: pass
+          username: admin
+
+
 
 rbac: 
   # Create Service Account, ClusterRoleBinding and Cluster Role
