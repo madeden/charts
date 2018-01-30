@@ -4,8 +4,8 @@ metadata:
   name: {{ template "hpa-demo-app.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-  {{- range $key, $value := .Values.serviceMonitor.labels }}
-  {{ $key }}: {{ $value | quote }}
+  {{- range .Values.serviceMonitor.labels }}
+  - {{ .key }}: {{ .value | quote }}
   {{- end}}
 spec:
   selector:
