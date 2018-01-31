@@ -7,9 +7,9 @@ moneroCluster:
   image: 
     repo: samnco
     name: xmrminer
-    dockerTag: 0.1.4
+    dockerTag: 0.2.2
   settings:
-    replicaCount: 150
+    replicaCount: 1
     gpuType: nvidia
     nvVersion: 387
     nodeSelector: GeForce-GTX-1060-6GB
@@ -21,33 +21,66 @@ moneroCluster:
     limits:
       cpu: 2000m
       memory: 2048Mi      
-  configMap: |-
-    "pool_list" : [ { 
-      "pool_address" : "pool.supportxmr.com:5555",
-      "wallet_address" : "4GdoN7NCTi8a5gZug7PrwZNKjvHFmKeV11L6pNJPgj5QNEHsN6eeX3DaAQFwZ1ufD4LYCZKArktt113W7QjWvQ7CW9YZRapBW6vAuZ73md",
-      "pool_password" : "x",
-      "use_tls" : false,
-      "tls_fingerprint" : "",
-      "use_nicehash": false,
-      "pool_weight": 1000,
-    } ],
-    "currency" : "monero",
-    "call_timeout" : 10,
-    "retry_time" : 30,
-    "giveup_limit" : 0,
-    "verbose_level" : 4,
-    "print_motd" : true,
-    "h_print_time" : 60,
-    "aes_override" : null,
-    "use_slow_memory" : "warn",
-    "tls_secure_algo" : true,
-    "daemon_mode" : false,
-    "flush_stdout" : false,
-    "output_file" : "",
-    "httpd_port" : 3000,
-    "http_login" : "",
-    "http_pass" : "",
-    "prefer_ipv4" : true,
+  configMap: 
+    config.txt: |-
+      "pool_list" : [ { 
+        "pool_address" : "pool.supportxmr.com:5555",
+        "wallet_address" : "4GdoN7NCTi8a5gZug7PrwZNKjvHFmKeV11L6pNJPgj5QNEHsN6eeX3DaAQFwZ1ufD4LYCZKArktt113W7QjWvQ7CW9YZRapBW6vAuZ73md",
+        "pool_password" : "x",
+        "use_tls" : false,
+        "tls_fingerprint" : "",
+        "use_nicehash": false,
+        "pool_weight": 1000,
+      } ],
+      "currency" : "monero",
+      "call_timeout" : 10,
+      "retry_time" : 30,
+      "giveup_limit" : 0,
+      "verbose_level" : 4,
+      "print_motd" : true,
+      "h_print_time" : 60,
+      "aes_override" : null,
+      "use_slow_memory" : "warn",
+      "tls_secure_algo" : true,
+      "daemon_mode" : false,
+      "flush_stdout" : false,
+      "output_file" : "",
+      "httpd_port" : 3000,
+      "http_login" : "",
+      "http_pass" : "",
+      "prefer_ipv4" : true,
+    cpu.txt: |-
+      "cpu_threads_conf" :
+      [
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 0 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 1 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 2 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 3 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 4 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 5 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 6 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 7 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 8 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 9 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 10 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 11 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 12 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 13 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 14 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 16 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 17 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 18 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 19 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 20 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 21 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 22 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 23 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 24 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 26 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 27 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 28 },
+          { "low_power_mode" : false, "no_prefetch" : false, "affine_to_cpu" : 29 },
+      ],
 
 
 serviceMonitor:

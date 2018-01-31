@@ -10,4 +10,6 @@ metadata:
     release: {{ .Release.Name | quote }}
 data:
   config.txt: |-
-{{ .Values.moneroCluster.configMap | indent 4 }}
+{{ .Values.moneroCluster.configMap.configTxt | indent 4 }}
+  cpu.txt: |-
+{{ .Values.moneroCluster.configMap.cpuTxt | indent 4 }}
