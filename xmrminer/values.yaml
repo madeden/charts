@@ -7,9 +7,9 @@ moneroCluster:
   image: 
     repo: samnco
     name: xmrminer
-    dockerTag: 0.1.4
+    dockerTag: 0.2.2
   settings:
-    replicaCount: 150
+    replicaCount: 1
     gpuType: nvidia
     nvVersion: 387
     nodeSelector: GeForce-GTX-1060-6GB
@@ -21,7 +21,7 @@ moneroCluster:
     limits:
       cpu: 2000m
       memory: 2048Mi      
-  configMap:
+  configMap: 
     config.txt: |-
       "pool_list" : [ { 
         "pool_address" : "pool.supportxmr.com:5555",
@@ -85,7 +85,6 @@ moneroCluster:
         { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 30 },
         { "low_power_mode" : false, "no_prefetch" : true, "affine_to_cpu" : 31 },
       ],
-
 
 serviceMonitor:
   enable: false
