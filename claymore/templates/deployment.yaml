@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "xmrminer.fullname" . }}
+  name: {{ template "miner.fullname" . }}
   namespace: {{ .Release.namespace }}
   labels:
-    app: {{ template "xmrminer.name" . }}
+    app: {{ template "miner.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -12,27 +12,48 @@ spec:
   replicas: {{ .Values.miningCluster.settings.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "xmrminer.name" . }}
+      app: {{ template "miner.name" . }}
       chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
   template:
     metadata:
       labels:
-        app: {{ template "xmrminer.name" . }}
+        app: {{ template "miner.name" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
     spec:
       containers:
-      - name: xmrminer
+      - name: miner
         image: {{ .Values.miningCluster.image.repo }}/{{ .Values.miningCluster.image.name }}:{{ .Values.miningCluster.image.dockerTag }}-{{ .Values.miningCluster.settings.gpuType }}
-        command: [ "/usr/local/bin/xmr-stak-sigint" ]
         {{ if eq .Values.miningCluster.settings.gpuType "amd" -}}
         securityContext:
           privileged: true
         {{- end }}
         env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DI
+          value: {{ .Values.miningCluster.settings.di | quote }}
+        - name: GSER
+          value: {{ .Values.miningCluster.settings.gser | quote }}
+        - name: MODE
+          value: {{ .Values.miningCluster.settings.mode | quote }}
+        - name: EPOOL
+          value: {{ .Values.miningCluster.settings.epool }}
+        - name: EWAL
+          value: {{ .Values.miningCluster.settings.ewal }}
+        - name: EPSW
+          value: {{ .Values.miningCluster.settings.epsw | quote }}
+        - name: ESM
+          value: {{ .Values.miningCluster.settings.esm | quote}}
+        - name: ETHI
+          value: {{ .Values.miningCluster.settings.ethi | quote }}
+        - name: MODE
+          value: {{ .Values.miningCluster.settings.mode | quote }}
         {{- if eq .Values.miningCluster.settings.gpuType "nvidia" }}
         - name: LD_LIBRARY_PATH
           value: "$LD_LIBRARY_PATH:/usr/lib/nvidia:/usr/lib/cuda"

@@ -1,1 +1,2 @@
-foobar
+Thanks for deploying Claymore Miner on Kubernetes. Happy Mining! 
+

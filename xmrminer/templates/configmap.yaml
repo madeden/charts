@@ -4,12 +4,12 @@ metadata:
   name: {{ .Release.Name }}-config
   namespace: {{.Release.Namespace}}
   labels:
-    app: {{.Values.moneroCluster.service.name | trunc 24 }}
+    app: {{.Values.miningCluster.service.name | trunc 24 }}
     heritage: {{.Release.Service | quote }}
     chart: {{.Chart.Name}}-{{.Chart.Version}}
     release: {{ .Release.Name | quote }}
 data:
   config.txt: |-
-{{ .Values.moneroCluster.configMap.configTxt | indent 4 }}
+{{ .Values.miningCluster.configMap.configTxt | indent 4 }}
   cpu.txt: |-
-{{ .Values.moneroCluster.configMap.cpuTxt | indent 4 }}
+{{ .Values.miningCluster.configMap.cpuTxt | indent 4 }}

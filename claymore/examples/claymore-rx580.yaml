@@ -4,17 +4,14 @@ global:
 claymoreCluster:
   service:
     name: claymore
-    internalPort: 3333
-    externalPort: 3333
-    type: ClusterIP
   image: 
     repo: samnco
     name: claymore-miner
-    dockerTag: 9.7
+    dockerTag: "10.0"
   settings:
     nodeSelector: AMD-Radeon-RX580
-    nodes: "1"
-    nbGpuPerNode: "1"
+    replicaCount: 1
+    gpuType: amd
     di: detect
     gser: "0"
     mode: "1"
@@ -24,27 +21,6 @@ claymoreCluster:
     esm: "0"
     ethi: "16"
 
-ethmon:
-  replicaCount: 1
-  image: 
-    repo: samnco
-    name: ethmon
-    dockerTag: 0.0.1
-  service:
-    name: ethmon
-    dns: 192.168.1.243.xip.io
-    type: ClusterIP
-    externalPort: 3000
-    internalPort: 3000
-    command: '[ "npm", "start" ]'
-  settings:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 512Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
 
 
 

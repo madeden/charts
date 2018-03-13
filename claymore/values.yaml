@@ -1,23 +1,19 @@
 global:
   imagePullPolicy: IfNotPresent
 
-claymoreCluster:
+miningCluster:
   service:
     name: claymore
-    internalPort: 3333
-    externalPort: 3333
-    type: ClusterIP
   image: 
     repo: samnco
     name: claymore-miner
     dockerTag: 10.0
   settings:
-    nodeSelector: GeForce-GTX-1060-6GB
+    replicaCount: 1
     gpuType: nvidia
-    nvVersion: 387 
-    nodes: "3"
-    nbGpuPerNode: "1"
-   # nbGpuPerWorker: 1
+    nvVersion: 390 
+    nodeSelector: GeForce-GTX-1060-6GB
+    # Now Business settings
     di: detect
     gser: "0"
     mode: "1"
@@ -34,27 +30,6 @@ claymoreCluster:
       cpu: 500m
       memory: 1Gi
 
-ethmon:
-  replicaCount: 1
-  image: 
-    repo: samnco
-    name: ethmon
-    dockerTag: 0.0.1
-  service:
-    name: ethmon
-    dns: 54.210.200.140.xip.io
-    type: ClusterIP
-    externalPort: 3000
-    internalPort: 3000
-    command: '[ "npm", "start" ]'
-  settings:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 512Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
 
 
 
