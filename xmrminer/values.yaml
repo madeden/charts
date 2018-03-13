@@ -1,7 +1,7 @@
 global:
   imagePullPolicy: IfNotPresent
 
-moneroCluster:
+miningCluster:
   service:
     name: monero
   image: 
@@ -11,7 +11,7 @@ moneroCluster:
   settings:
     replicaCount: 1
     gpuType: nvidia
-    nvVersion: 387
+    nvVersion: 390
     nodeSelector: GeForce-GTX-1060-6GB
   resources:
     # Only add CPU and Memory in here, nvidia GPUs are part of the model already. 

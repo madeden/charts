@@ -7,7 +7,7 @@ claymoreCluster:
   image: 
     repo: samnco
     name: claymore-miner
-    dockerTag: "10.0"
+    dockerTag: "11.2"
   settings:
     replicaCount: 3
     nodeSelector: GeForce-GTX-1060-6GB

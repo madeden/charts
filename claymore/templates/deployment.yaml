@@ -63,8 +63,6 @@ spec:
           value: "$LD_LIBRARY_PATH:/opt/amdgpu-pro/lib:/usr/lib/x86_64-linux-gnu"
         {{- end }}
         volumeMounts:
-        - name: {{ .Release.Name }}-config
-          mountPath: /config
         {{ if eq .Values.miningCluster.settings.gpuType "nvidia" -}}
         - mountPath: /usr/local/nvidia/bin
           name: bin
@@ -89,9 +87,6 @@ spec:
             alpha.kubernetes.io/nvidia-gpu: 1
             {{- end }}
       volumes:
-      - name: {{ .Release.Name -}}-config
-        configMap:
-          name: {{ .Release.Name -}}-config
       {{ if eq .Values.miningCluster.settings.gpuType "nvidia" -}}
       - name: bin
         hostPath:
